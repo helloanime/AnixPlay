@@ -1,2 +1,2 @@
 # AnixPlay
-Ultimate Platform To Watch Anime's
+Ultimate Platform To Watch Anime
