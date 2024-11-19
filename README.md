@@ -1,2 +1,4 @@
 # AnixPlay
-Ultimate Platform To Watch Anime
+The Ultimate Platform To Watch Anime
+
+**COMING SOON**
