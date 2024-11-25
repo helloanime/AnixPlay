@@ -3,7 +3,7 @@ import { Search, ChevronLeft, ChevronRight } from 'lucide-react';
 import Navbar from './components/Navbar';
 import ContentSection from './components/ContentSection';
 import SearchBar from './components/SearchBar';
-import HeroSection from './components/HeroSection';
+import ContentCards from './components/ContentCard';
 
 function App() {
   return (
@@ -11,7 +11,7 @@ function App() {
       <Navbar />
       
       <main className="container mx-auto px-4 pt-16">
-        <HeroSection />
+        <ContentCards />
         
         <ContentSection 
           title="Trending" 
@@ -69,10 +69,10 @@ function App() {
 
         <div className="flex justify-center gap-4 my-12">
           <button className="px-6 py-2 bg-purple-600 rounded-full hover:bg-purple-700 transition-colors">
-            Reach
+            Show More
           </button>
           <button className="px-6 py-2 bg-purple-600/20 rounded-full hover:bg-purple-600/30 transition-colors">
-            Drop value
+            Drop Value
           </button>
         </div>
       </main>

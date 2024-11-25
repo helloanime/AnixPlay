@@ -21,7 +21,7 @@ const ContentSection = ({ title, subtitle, items }: ContentSectionProps) => {
           <h2 className="text-2xl font-bold">{title}</h2>
           <p className="text-sm text-gray-400">{subtitle}</p>
         </div>
-        <div className="text-sm text-gray-400">See all you</div>
+        <div className="text-sm text-gray-400">See all</div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
