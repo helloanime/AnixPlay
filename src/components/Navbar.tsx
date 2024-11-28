@@ -22,7 +22,7 @@ const Navbar = () => {
 
           {/* Desktop menu */}
           <div className="hidden md:flex items-center gap-8">
-            <a href="/" className="hover:text-purple-400 transition-colors">Home</a>
+            <a href="/home" className="hover:text-purple-400 transition-colors">Home</a>
             <a href="/access" className="hover:text-purple-400 transition-colors">Access</a>
             <a href="/resources" className="hover:text-purple-400 transition-colors">Resources</a>
             <button className="px-4 py-1.5 bg-purple-500 rounded-full hover:bg-purple-600 transition-colors">

@@ -3,7 +3,7 @@ import { Search, ChevronLeft, ChevronRight } from 'lucide-react';
 import Navbar from '../components/Navbar';
 import ContentSection from '../components/ContentSection';
 import SearchBar from '../components/SearchBar';
-import ContentCards from '../components/ContentCards';
+import UpperContent from '../components/UpperContent';
 
 const Home = () => {
   return (
@@ -11,16 +11,16 @@ const Home = () => {
       <Navbar />
       
       <main className="container mx-auto px-4 pt-16">
-        <ContentCards />
+        <UpperContent />
         
         <ContentSection 
           title="Trending" 
           subtitle="Home"
           items={[
             {
-              title: "Demon Slayer",
+              title: "Blue Lock",
               subtitle: "Kimetsu no Yaiba",
-              image: "https://images.unsplash.com/photo-1578632292335-df3abbb0d586?w=500&h=280&fit=crop"
+              image: "https://media.kitsu.app/anime/47245/poster_image/fbeabe98d37b9a8305975a2ebfc874e6.png"
             },
             {
               title: "Demon Slayer",

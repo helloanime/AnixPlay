@@ -1,12 +1,12 @@
 import React from 'react';
 import SearchBar from './SearchBar';
 
-const ContentCards = () => {
+const UpperContent = () => {
   return (
-    <div className="relative min-h-[80vh] flex flex-col items-center justify-center text-center px-4 mb-12 md:mb-24">
+    <div className="relative min-h-[60vh] flex flex-col items-center justify-center text-center px-4 mb-12 md:mb-24">
       <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1578632292335-df3abbb0d586?w=1920&h=1080&fit=crop')] bg-cover bg-center opacity-10"></div>
       
-      <div className="relative z-10 max-w-3xl mx-auto">
+      <div className="relative z-10 max-w-4xl mx-auto">
         <h1 className="text-3xl md:text-5xl font-bold mb-4">
           Demon Slayer:{' '}
           <span className="bg-gradient-to-r from-purple-400 to-pink-500 bg-clip-text text-transparent">
@@ -35,4 +35,4 @@ const ContentCards = () => {
   );
 };
 
-export default ContentCards;
+export default UpperContent;
