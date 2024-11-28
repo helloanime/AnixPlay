@@ -3,7 +3,7 @@ import { Search, ChevronLeft, ChevronRight } from 'lucide-react';
 import Navbar from '../components/Navbar';
 import ContentSection from '../components/ContentSection';
 import SearchBar from '../components/SearchBar';
-import HeroSection from '../components/HeroSection';
+import ContentCards from '../components/ContentCards';
 
 const Home = () => {
   return (
@@ -11,7 +11,7 @@ const Home = () => {
       <Navbar />
       
       <main className="container mx-auto px-4 pt-16">
-        <HeroSection />
+        <ContentCards />
         
         <ContentSection 
           title="Trending" 

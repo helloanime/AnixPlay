@@ -9,7 +9,7 @@ const Landing = () => {
       <header className="text-center mb-8">
         <img 
           src="/logo.png" 
-          alt="AniWave" 
+          alt="AnixPlay" 
           className="h-8 md:h-12 mx-auto mb-4 md:mb-6"
         />
         <nav className="flex flex-wrap justify-center gap-4 md:gap-6 text-gray-400 text-sm md:text-base">

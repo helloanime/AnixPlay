@@ -9,7 +9,7 @@ const Navbar = () => {
       <div className="container mx-auto px-4 py-4">
         <div className="flex justify-between items-center">
           <a href="/" className="text-2xl font-bold bg-gradient-to-r from-purple-400 to-pink-500 bg-clip-text text-transparent">
-            Aninux
+            AnixPlay
           </a>
           
           {/* Mobile menu button */}

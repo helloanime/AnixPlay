@@ -1,7 +1,7 @@
 import React from 'react';
 import SearchBar from './SearchBar';
 
-const HeroSection = () => {
+const ContentCards = () => {
   return (
     <div className="relative min-h-[80vh] flex flex-col items-center justify-center text-center px-4 mb-12 md:mb-24">
       <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1578632292335-df3abbb0d586?w=1920&h=1080&fit=crop')] bg-cover bg-center opacity-10"></div>
@@ -35,4 +35,4 @@ const HeroSection = () => {
   );
 };
 
-export default HeroSection;
+export default ContentCards;
