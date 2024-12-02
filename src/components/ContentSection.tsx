@@ -15,7 +15,7 @@ interface ContentSectionProps {
 
 const ContentSection = ({ title, subtitle, items }: ContentSectionProps) => {
   return (
-    <section className="mb-8 md:mb-16 px-4">
+    <section className="mb-8 md:mb-12 px-4"> {/* Want to keep the blur? */}
       <div className="flex justify-between items-center mb-6">
         <div>
           <h2 className="text-xl md:text-2xl font-bold">{title}</h2>
@@ -30,7 +30,7 @@ const ContentSection = ({ title, subtitle, items }: ContentSectionProps) => {
             key={index}
             className="relative group overflow-hidden rounded-xl cursor-pointer"
           >
-            <div className="aspect-[16/9] overflow-hidden">
+            <div className="aspect-[/9] overflow-hidden"> {/* This a good size? Just is original for picture */}
               <img
                 src={item.image}
                 alt={item.title}

@@ -4,7 +4,7 @@ import SearchBar from './SearchBar';
 const UpperContent = () => {
   return (
     <div className="relative min-h-[60vh] flex flex-col items-center justify-center text-center px-4 mb-12 md:mb-24">
-      <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1578632292335-df3abbb0d586?w=1920&h=1080&fit=crop')] bg-cover bg-center opacity-10"></div>
+      <div className="absolute inset-0 bg-[url('https://img.bunnyccdn.co/_r/1366x768/100/db/86/db8603d2f4fa78e1c42f6cf829030a18/db8603d2f4fa78e1c42f6cf829030a18.jpg')] bg-cover bg-center opacity-10"></div> {/* Maybe have changing pictures and different sizing? */}
       
       <div className="relative z-10 max-w-4xl mx-auto">
         <h1 className="text-3xl md:text-5xl font-bold mb-4">

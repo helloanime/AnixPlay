@@ -49,25 +49,26 @@ const Landing = () => {
           <ShareButtons shares={21500} />
 
           <section className="prose prose-invert max-w-none text-sm md:text-base">
-            <h1 className="text-2xl md:text-3xl font-bold mb-4 bg-gradient-to-r from-purple-400 to-pink-500 bg-clip-text text-transparent">Aniwave.se - Your Ultimate Destination for Free Anime Streaming</h1>
+            <h1 className="text-2xl md:text-3xl font-bold mb-4 bg-gradient-to-r from-purple-400 to-pink-500 bg-clip-text text-transparent">AnixPLay - Your Ultimate Destination for Free Anime Streaming</h1>
             <p className="text-gray-400 mb-6">
-              Aniwave is a free anime streaming website where users can watch and use premium features without registration. By late 2016, we noticed that many free anime streaming sites had poor user interfaces (UI) and user experiences (UX). So, our team created 9anime to give anime fans a better option.
+              AnixPlay arrived at the end of 2023. This new name marks a fresh start with better offerings for anime fans.
+              is a free anime streaming website where users can watch and use premium features without registration. By late 2016, we noticed that many free anime streaming sites had poor user interfaces (UI) and user experiences (UX). So, our team created 9anime to give anime fans a better option.
             </p>
             <p className="text-gray-400 mb-8">
-              AniWave arrived at the end of 2023. This new name marks a fresh start with better offerings for anime fans.
+              AnixPlay arrived at the end of 2023. This new name marks a fresh start with better offerings for anime fans.
             </p>
 
-            <h2 className="text-xl md:text-2xl font-bold mb-4 text-purple-400">What is Aniwave.to?</h2>
+            <h2 className="text-xl md:text-2xl font-bold mb-4 text-purple-400">What is AnixPlay?</h2>
             <p className="text-gray-400 mb-8">
-              Aniwave.to is a free site where you can watch anime online in high definition. You can choose between English subtitles or dubbing. You can also download any anime without registration or payment. Everything on here is free! User accounts are optional for creating watchlists, importing watchlists, saving favorite anime shows, and continuing watching where you left off. You can also make new folders and use Watch2Gether with friends to watch online together.
+              AnixPlay is a free site where you can watch anime online in high definition. You can choose between English subtitles or dubbing. You can also download any anime without registration or payment. Everything on here is free! User accounts are optional for creating watchlists, importing watchlists, saving favorite anime shows, and continuing watching where you left off. You can also make new folders and use Watch2Gether with friends to watch online together.
             </p>
 
-            <h2 className="text-xl md:text-2xl font-bold mb-4 text-purple-400">Is Aniwave.se Safe?</h2>
+            <h2 className="text-xl md:text-2xl font-bold mb-4 text-purple-400">Is AnixPlay Safe?</h2>
             <p className="text-gray-400 mb-8">
-              Yes, Aniwave is safe. We made this site to improve UX, ensuring user safety. Please report anything suspicious. We do run ads to keep the site going, but we aim to ensure a safe experience.
+              Yes, AnixPlay is safe. We made this site to improve UX, ensuring user safety. Please report anything suspicious. We do run ads to keep the site going, but we aim to ensure a safe experience.
             </p>
 
-            <h2 className="text-xl md:text-2xl font-bold mb-4 text-purple-400">Why is Aniwave.se the Best Site to Watch Anime Free Online?</h2>
+            <h2 className="text-xl md:text-2xl font-bold mb-4 text-purple-400">Why is AnixPlay the Best Site to Watch Anime Free Online?</h2>
             <ul className="text-gray-400 space-y-4 mb-8">
               <li><strong className="text-purple-400">Extensive Content Library:</strong> Our library was second only to Kissanime before it shut down. We keep adding new and old anime, making us the largest anime library online.</li>
               <li><strong className="text-purple-400">Great Streaming Experience:</strong> We use top-quality streaming servers. You can also pick the fastest one for your location.</li>
