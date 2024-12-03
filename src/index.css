@@ -1,0 +1,215 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: #0f0f1a;
+  --card: #1a1a2e;
+  --primary: #ff4081;
+  --text: #ffffff;
+  --text-secondary: #8b8b9f;
+}
+
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: var(--background);
+  color: var(--text);
+  overflow-x: hidden;
+}
+
+/* Mobile-first approach */
+@layer utilities {
+  .container-padding {
+    @apply px-4 sm:px-6 lg:px-8;
+  }
+
+  .text-responsive {
+    @apply text-sm md:text-base;
+  }
+
+  .heading-responsive {
+    @apply text-lg md:text-xl lg:text-2xl;
+  }
+}
+
+/* Responsive container */
+.container {
+  width: 100%;
+  margin-right: auto;
+  margin-left: auto;
+  padding-right: 1rem;
+  padding-left: 1rem;
+}
+
+@media (min-width: 640px) {
+  .container {
+    max-width: 640px;
+    padding-right: 1.5rem;
+    padding-left: 1.5rem;
+  }
+}
+
+@media (min-width: 768px) {
+  .container {
+    max-width: 768px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .container {
+    max-width: 1024px;
+  }
+}
+
+@media (min-width: 1280px) {
+  .container {
+    max-width: 1280px;
+  }
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--background);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--card);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--primary);
+}
+
+/* Mobile menu */
+@media (max-width: 768px) {
+  .mobile-menu-open {
+    overflow: hidden;
+  }
+}
+
+/* Responsive images */
+.responsive-image {
+  max-width: 100%;
+  height: auto;
+}
+
+/* Gradient backgrounds */
+.bg-gradient-hero {
+  background: linear-gradient(
+    to right,
+    var(--background) 0%,
+    rgba(15, 15, 26, 0.8) 50%,
+    transparent 100%
+  );
+}
+
+@media (max-width: 768px) {
+  .bg-gradient-hero {
+    background: linear-gradient(
+      to bottom,
+      var(--background) 0%,
+      rgba(15, 15, 26, 0.9) 50%,
+      var(--background) 100%
+    );
+  }
+}
+
+/* Card hover effects */
+.card-hover {
+  transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+}
+
+.card-hover:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* Nav link */
+.nav-link {
+  @apply text-[#8b8b9f] hover:text-white transition-colors relative;
+}
+
+/* Search input */
+.search-input {
+  @apply w-full bg-[#1a1a2e] text-white px-4 py-3 rounded-lg 
+         focus:outline-none focus:ring-2 focus:ring-purple-500/20
+         placeholder-[#8b8b9f];
+}
+
+/* Button */
+.btn {
+  @apply px-4 py-2 rounded transition-colors text-sm font-medium;
+}
+
+/* Button primary */
+.btn-primary {
+  @apply bg-purple-500 hover:bg-purple-600 text-white;
+}
+
+/* Button social */
+.btn-social {
+  @apply flex-1 px-4 py-2 rounded transition-colors text-sm;
+}
+
+/* Button facebook */
+.btn-facebook {
+  @apply bg-blue-500/10 hover:bg-blue-500/20 text-blue-400;
+}
+
+/* Button twitter */
+.btn-twitter {
+  @apply bg-sky-500/10 hover:bg-sky-500/20 text-sky-400;
+}
+
+/* Button reddit */
+.btn-reddit {
+  @apply bg-red-500/10 hover:bg-red-500/20 text-red-400;
+}
+
+/* Text gradient */
+.text-gradient {
+  @apply bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-pink-500;
+}
+
+/* Text stroke */
+.text-stroke {
+  -webkit-text-stroke: 1px rgba(255, 255, 255, 0.2);
+  text-stroke: 1px rgba(255, 255, 255, 0.2);
+}
+
+/* Glass morphism */
+.glass-panel {
+  @apply backdrop-blur-md bg-white/5 border border-white/10;
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.5s ease-out forwards;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .container {
+    @apply px-4;
+  }
+}
+
+.bg-gradient {
+  background: linear-gradient(to right, var(--background) 0%, transparent 100%);
+}
