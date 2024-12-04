@@ -38,7 +38,7 @@ const Home = () => {
               image: "https://img.bunnyccdn.co/_r/300x400/100/c3/67/c3670b66104179ccff9492aa8158fde3/c3670b66104179ccff9492aa8158fde3.jpg"
             },
           ]} 
-        /> {/* Need to make it so that the arrows at the bottom work*/}
+        />
 
         <ContentSection 
           title="Recommended" 
@@ -50,52 +50,25 @@ const Home = () => {
               image: "https://img.bunnyccdn.co/_r/300x400/100/27/52/27527aa58aac5c82f6d9061a716989fe/27527aa58aac5c82f6d9061a716989fe.jpg"
             },
             {
-              title: "Shangri-La Frontier",
-              subtitle: "Home & comedy mix",
-              image: "https://img.bunnyccdn.co/_r/300x400/100/0f/c6/0fc66f9879a3a4a15408c325e1677e17/0fc66f9879a3a4a15408c325e1677e17.jpg"
+              title: "Classroom of the Elite",
+              subtitle: "Latest anime updates",
+              image: "https://img.bunnyccdn.co/_r/300x400/100/5d/b4/5db400c33e5c1cc77f9702e4f9a53a63/5db400c33e5c1cc77f9702e4f9a53a63.jpg"
             },
             {
-              title: "Love LIVE! Superstar!!",
-              subtitle: "Archive collection",
-              image: "https://img.bunnyccdn.co/_r/300x400/100/63/b1/63b1d4a89b20d9b1a1c5a11e068ce44e/63b1d4a89b20d9b1a1c5a11e068ce44e.jpg"
+              title: "Demon Slayer",
+              subtitle: "Top rated series",
+              image: "https://img.bunnyccdn.co/_r/300x400/100/8b/df/8bdf4cad7bc444c0f33f8544d42ad87e/8bdf4cad7bc444c0f33f8544d42ad87e.jpg"
             },
             {
-              title: "Psuedo Harem",
-              subtitle: "Latest updates",
-              image: "https://img.bunnyccdn.co/_r/300x400/100/c4/19/c419bb45d8063ba9f18915a74fb449ae/c419bb45d8063ba9f18915a74fb449ae.jpg"
-            }
+              title: "Jujutsu Kaisen",
+              subtitle: "Must watch anime",
+              image: "https://img.bunnyccdn.co/_r/300x400/100/a0/18/a018e98812cad9b6f3a569f197b4c1c9/a018e98812cad9b6f3a569f197b4c1c9.jpg"
+            },
           ]} 
         />
-
-        <ContentSection 
-          title="Recent Updates" 
-          subtitle="See all"
-          items={[
-            {
-              title: "Bleach",
-              subtitle: "Kimetsu no Yaiba",
-              image: "https://img.bunnyccdn.co/_r/300x400/100/bd/5a/bd5ae1d387a59c5abcf5e1a6a616728c/bd5ae1d387a59c5abcf5e1a6a616728c.jpg"
-            },
-            {
-              title: "Mission: Yozakura Family", 
-              subtitle: "Home & comedy mix",
-              image: "https://img.bunnyccdn.co/_r/300x400/100/25/9c/259ca4ad41fd80081677b04a880c7d4b/259ca4ad41fd80081677b04a880c7d4b.jpg"
-            },
-            {
-              title: "The Do-Over Damsel Conquers the Dragon Emperor",
-              subtitle: "Archive collection",
-              image: "https://img.bunnyccdn.co/_r/300x400/100/75/c3/75c35bc0256474202d917ca320fa99e4/75c35bc0256474202d917ca320fa99e4.jpg"
-            },
-            {
-              title: "Beyblade X",
-              subtitle: "Latest updates",
-              image: "https://img.bunnyccdn.co/_r/300x400/100/ea/d4/ead47129d7080b87764abe4117d0c92e/ead47129d7080b87764abe4117d0c92e.png"
-            }
-          ]} 
-        /> {/* Need to fix the weird line for Mission: Yozakura Family and The Do-Over Damsel Conquers the Dragon Emperor */} {/* Might need to find better images */}
       </main>
     </div>
   );
-}
+};
 
 export default Home;

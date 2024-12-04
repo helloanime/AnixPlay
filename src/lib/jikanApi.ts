@@ -1,17 +1,10 @@
-import type {
-  AnimeSearchParams,
-  MangaSearchParams,
-  CharacterSearchParams,
-  PersonSearchParams,
-  ClubSearchParams,
-} from '../types/jikan';
+import { AnimeSearchParams } from '../types/anime';
+import { MangaSearchParams } from '../types/manga';
+import { CommonResponse } from '../types/common';
 
 const BASE_URL = 'https://api.jikan.moe/v4';
-
-// Rate limiting configuration
-const RATE_LIMIT = 60; // requests per minute
-const RATE_LIMIT_INTERVAL = 60000; // 1 minute in milliseconds
-const RATE_LIMIT_BUFFER = 100; // ms buffer between requests
+const RATE_LIMIT = 60;
+const RATE_LIMIT_INTERVAL = 60000;
 let requestCount = 0;
 let lastRequestTime = Date.now();
 
@@ -22,7 +15,6 @@ export class APIError extends Error {
   }
 }
 
-// Rate limiting handler
 const handleRateLimit = async () => {
   const now = Date.now();
   if (now - lastRequestTime >= RATE_LIMIT_INTERVAL) {
@@ -31,24 +23,16 @@ const handleRateLimit = async () => {
   }
 
   if (requestCount >= RATE_LIMIT) {
-    const waitTime = RATE_LIMIT_INTERVAL - (now - lastRequestTime) + RATE_LIMIT_BUFFER;
+    const waitTime = RATE_LIMIT_INTERVAL - (now - lastRequestTime);
     await new Promise(resolve => setTimeout(resolve, waitTime));
     requestCount = 0;
     lastRequestTime = Date.now();
   }
-
-  // Add small buffer between requests
-  if (requestCount > 0) {
-    await new Promise(resolve => setTimeout(resolve, RATE_LIMIT_BUFFER));
-  }
-
   requestCount++;
 };
 
-// Generic fetch handler with rate limiting and error handling
-const fetchWithRateLimit = async <T>(endpoint: string, options: RequestInit = {}): Promise<T> => {
+const fetchWithRateLimit = async <T>(endpoint: string, options: RequestInit = {}): Promise<CommonResponse<T>> => {
   await handleRateLimit();
-
   const response = await fetch(`${BASE_URL}${endpoint}`, {
     ...options,
     headers: {
@@ -64,7 +48,6 @@ const fetchWithRateLimit = async <T>(endpoint: string, options: RequestInit = {}
   return response.json();
 };
 
-// Helper function to build query string
 const buildQueryString = (params: Record<string, any>) => {
   const query = Object.entries(params)
     .filter(([_, value]) => value !== undefined && value !== null)
@@ -81,268 +64,243 @@ const buildQueryString = (params: Record<string, any>) => {
 export const jikanApi = {
   // Anime Endpoints
   anime: {
+    getTop: (page = 1, limit = 25, filter?: string) =>
+      fetchWithRateLimit(`/top/anime${buildQueryString({ page, limit, filter })}`),
     search: (params: AnimeSearchParams) =>
       fetchWithRateLimit(`/anime${buildQueryString(params)}`),
-
-    getById: (id: number) =>
-      fetchWithRateLimit(`/anime/${id}`),
-
-    getCharacters: (id: number) =>
-      fetchWithRateLimit(`/anime/${id}/characters`),
-
-    getStaff: (id: number) =>
-      fetchWithRateLimit(`/anime/${id}/staff`),
-
+    getById: (id: number, fields?: string[]) =>
+      fetchWithRateLimit(`/anime/${id}${fields ? buildQueryString({ fields: fields.join(',') }) : ''}`),
     getEpisodes: (id: number, page = 1) =>
       fetchWithRateLimit(`/anime/${id}/episodes${buildQueryString({ page })}`),
-
-    getNews: (id: number, page = 1) =>
-      fetchWithRateLimit(`/anime/${id}/news${buildQueryString({ page })}`),
-
-    getForum: (id: number, filter?: string) =>
-      fetchWithRateLimit(`/anime/${id}/forum${filter ? buildQueryString({ filter }) : ''}`),
-
-    getPictures: (id: number) =>
-      fetchWithRateLimit(`/anime/${id}/pictures`),
-
-    getVideos: (id: number) =>
-      fetchWithRateLimit(`/anime/${id}/videos`),
-
-    getStatistics: (id: number) =>
-      fetchWithRateLimit(`/anime/${id}/statistics`),
-
-    getMoreInfo: (id: number) =>
-      fetchWithRateLimit(`/anime/${id}/moreinfo`),
-
+    getEpisodeById: (id: number, episode: number) =>
+      fetchWithRateLimit(`/anime/${id}/episodes/${episode}`),
+    getCharacters: (id: number) =>
+      fetchWithRateLimit(`/anime/${id}/characters`),
+    getStaff: (id: number) =>
+      fetchWithRateLimit(`/anime/${id}/staff`),
     getRecommendations: (id: number) =>
       fetchWithRateLimit(`/anime/${id}/recommendations`),
-
-    getUserUpdates: (id: number, page = 1) =>
-      fetchWithRateLimit(`/anime/${id}/userupdates${buildQueryString({ page })}`),
-
-    getReviews: (id: number, page = 1) =>
-      fetchWithRateLimit(`/anime/${id}/reviews${buildQueryString({ page })}`),
-
-    getRelations: (id: number) =>
-      fetchWithRateLimit(`/anime/${id}/relations`),
-
+    getPictures: (id: number) =>
+      fetchWithRateLimit(`/anime/${id}/pictures`),
+    getStatistics: (id: number) =>
+      fetchWithRateLimit(`/anime/${id}/statistics`),
     getThemes: (id: number) =>
       fetchWithRateLimit(`/anime/${id}/themes`),
-
+    getRelations: (id: number) =>
+      fetchWithRateLimit(`/anime/${id}/relations`),
+    getNews: (id: number, page = 1) =>
+      fetchWithRateLimit(`/anime/${id}/news${buildQueryString({ page })}`),
+    getForum: (id: number, filter?: string) =>
+      fetchWithRateLimit(`/anime/${id}/forum${filter ? buildQueryString({ filter }) : ''}`),
+    getVideos: (id: number) =>
+      fetchWithRateLimit(`/anime/${id}/videos`),
+    getVideoEpisodes: (id: number, page = 1) =>
+      fetchWithRateLimit(`/anime/${id}/videos/episodes${buildQueryString({ page })}`),
+    getVideoPromos: (id: number) =>
+      fetchWithRateLimit(`/anime/${id}/videos/promo`),
+    getMusicVideos: (id: number) =>
+      fetchWithRateLimit(`/anime/${id}/videos/music-videos`),
+    getRandom: (nsfw?: boolean) =>
+      fetchWithRateLimit(`/random/anime${nsfw ? buildQueryString({ nsfw }) : ''}`),
     getExternal: (id: number) =>
       fetchWithRateLimit(`/anime/${id}/external`),
-
     getStreamingLinks: (id: number) =>
       fetchWithRateLimit(`/anime/${id}/streaming`),
+    getUserUpdates: (id: number, page = 1) =>
+      fetchWithRateLimit(`/anime/${id}/userupdates${buildQueryString({ page })}`),
+    getReviews: (id: number, page = 1) =>
+      fetchWithRateLimit(`/anime/${id}/reviews${buildQueryString({ page })}`),
   },
 
   // Manga Endpoints
   manga: {
+    getTop: (page = 1, limit = 25, filter?: string) =>
+      fetchWithRateLimit(`/top/manga${buildQueryString({ page, limit, filter })}`),
     search: (params: MangaSearchParams) =>
       fetchWithRateLimit(`/manga${buildQueryString(params)}`),
-
     getById: (id: number) =>
       fetchWithRateLimit(`/manga/${id}`),
-
     getCharacters: (id: number) =>
       fetchWithRateLimit(`/manga/${id}/characters`),
-
     getNews: (id: number, page = 1) =>
       fetchWithRateLimit(`/manga/${id}/news${buildQueryString({ page })}`),
-
-    getForum: (id: number, filter?: string) =>
-      fetchWithRateLimit(`/manga/${id}/forum${filter ? buildQueryString({ filter }) : ''}`),
-
-    getPictures: (id: number) =>
-      fetchWithRateLimit(`/manga/${id}/pictures`),
-
-    getStatistics: (id: number) =>
-      fetchWithRateLimit(`/manga/${id}/statistics`),
-
-    getMoreInfo: (id: number) =>
-      fetchWithRateLimit(`/manga/${id}/moreinfo`),
-
-    getRecommendations: (id: number) =>
-      fetchWithRateLimit(`/manga/${id}/recommendations`),
-
-    getUserUpdates: (id: number, page = 1) =>
-      fetchWithRateLimit(`/manga/${id}/userupdates${buildQueryString({ page })}`),
-
     getReviews: (id: number, page = 1) =>
       fetchWithRateLimit(`/manga/${id}/reviews${buildQueryString({ page })}`),
-
-    getRelations: (id: number) =>
-      fetchWithRateLimit(`/manga/${id}/relations`),
-
+    getRecommendations: (id: number) =>
+      fetchWithRateLimit(`/manga/${id}/recommendations`),
+    getPictures: (id: number) =>
+      fetchWithRateLimit(`/manga/${id}/pictures`),
+    getStatistics: (id: number) =>
+      fetchWithRateLimit(`/manga/${id}/statistics`),
+    getMoreInfo: (id: number) =>
+      fetchWithRateLimit(`/manga/${id}/moreinfo`),
+    getRandom: (nsfw?: boolean) =>
+      fetchWithRateLimit(`/random/manga${nsfw ? buildQueryString({ nsfw }) : ''}`),
     getExternal: (id: number) =>
       fetchWithRateLimit(`/manga/${id}/external`),
+    getUserUpdates: (id: number, page = 1) =>
+      fetchWithRateLimit(`/manga/${id}/userupdates${buildQueryString({ page })}`),
   },
 
-  // Character Endpoints
+  // Characters
   characters: {
-    search: (params: CharacterSearchParams) =>
-      fetchWithRateLimit(`/characters${buildQueryString(params)}`),
-
     getById: (id: number) =>
       fetchWithRateLimit(`/characters/${id}`),
-
-    getAnime: (id: number) =>
-      fetchWithRateLimit(`/characters/${id}/anime`),
-
-    getManga: (id: number) =>
-      fetchWithRateLimit(`/characters/${id}/manga`),
-
-    getVoiceActors: (id: number) =>
-      fetchWithRateLimit(`/characters/${id}/voices`),
-
     getPictures: (id: number) =>
       fetchWithRateLimit(`/characters/${id}/pictures`),
+    getAnime: (id: number) =>
+      fetchWithRateLimit(`/characters/${id}/anime`),
+    getManga: (id: number) =>
+      fetchWithRateLimit(`/characters/${id}/manga`),
+    getVoiceActors: (id: number) =>
+      fetchWithRateLimit(`/characters/${id}/voices`),
+    getRandom: () =>
+      fetchWithRateLimit('/random/characters'),
   },
 
-  // People Endpoints
+  // People
   people: {
-    search: (params: PersonSearchParams) =>
-      fetchWithRateLimit(`/people${buildQueryString(params)}`),
-
     getById: (id: number) =>
       fetchWithRateLimit(`/people/${id}`),
-
     getAnime: (id: number) =>
       fetchWithRateLimit(`/people/${id}/anime`),
-
     getManga: (id: number) =>
       fetchWithRateLimit(`/people/${id}/manga`),
-
-    getVoices: (id: number) =>
-      fetchWithRateLimit(`/people/${id}/voices`),
-
     getPictures: (id: number) =>
       fetchWithRateLimit(`/people/${id}/pictures`),
+    getVoices: (id: number) =>
+      fetchWithRateLimit(`/people/${id}/voices`),
+    getRandom: () =>
+      fetchWithRateLimit('/random/people'),
   },
 
-  // Season Endpoints
+  // Seasonal
   seasons: {
-    list: () =>
+    getCurrent: (page = 1, filter?: string) =>
+      fetchWithRateLimit(`/seasons/now${buildQueryString({ page, filter })}`),
+    get: (year: number, season: string, page = 1, filter?: string) =>
+      fetchWithRateLimit(`/seasons/${year}/${season}${buildQueryString({ page, filter })}`),
+    getList: () =>
       fetchWithRateLimit('/seasons'),
-
-    getCurrent: (page = 1) =>
-      fetchWithRateLimit(`/seasons/now${buildQueryString({ page })}`),
-
-    getUpcoming: (page = 1) =>
-      fetchWithRateLimit(`/seasons/upcoming${buildQueryString({ page })}`),
-
-    getSeason: (year: number, season: string, page = 1) =>
-      fetchWithRateLimit(`/seasons/${year}/${season}${buildQueryString({ page })}`),
+    getUpcoming: (page = 1, filter?: string) =>
+      fetchWithRateLimit(`/seasons/upcoming${buildQueryString({ page, filter })}`),
   },
 
-  // Schedule Endpoints
-  schedules: {
-    get: (filter?: string, page = 1) =>
-      fetchWithRateLimit(`/schedules${filter ? `/${filter}` : ''}${buildQueryString({ page })}`),
+  // Watch Lists
+  watch: {
+    getRecentEpisodes: (page = 1, filter?: string) =>
+      fetchWithRateLimit(`/watch/episodes${buildQueryString({ page, filter })}`),
+    getPopularEpisodes: (page = 1, filter?: string) =>
+      fetchWithRateLimit(`/watch/episodes/popular${buildQueryString({ page, filter })}`),
+    getRecentPromos: (page = 1) =>
+      fetchWithRateLimit(`/watch/promos${buildQueryString({ page })}`),
+    getPopularPromos: (page = 1) =>
+      fetchWithRateLimit(`/watch/promos/popular${buildQueryString({ page })}`),
   },
 
-  // Top Endpoints
-  top: {
-    getAnime: (filter?: string, page = 1) =>
-      fetchWithRateLimit(`/top/anime${filter ? `/${filter}` : ''}${buildQueryString({ page })}`),
-
-    getManga: (filter?: string, page = 1) =>
-      fetchWithRateLimit(`/top/manga${filter ? `/${filter}` : ''}${buildQueryString({ page })}`),
-
-    getPeople: (page = 1) =>
-      fetchWithRateLimit(`/top/people${buildQueryString({ page })}`),
-
-    getCharacters: (page = 1) =>
-      fetchWithRateLimit(`/top/characters${buildQueryString({ page })}`),
-
-    getReviews: (page = 1, type?: 'anime' | 'manga') =>
-      fetchWithRateLimit(`/top/reviews${type ? `/${type}` : ''}${buildQueryString({ page })}`),
+  // Reviews
+  reviews: {
+    getRecentAnime: (page = 1) =>
+      fetchWithRateLimit(`/reviews/anime${buildQueryString({ page })}`),
+    getRecentManga: (page = 1) =>
+      fetchWithRateLimit(`/reviews/manga${buildQueryString({ page })}`),
   },
 
-  // Genre Endpoints
-  genres: {
-    getAnime: () =>
-      fetchWithRateLimit('/genres/anime'),
-
-    getManga: () =>
-      fetchWithRateLimit('/genres/manga'),
+  // Recommendations
+  recommendations: {
+    getRecentAnime: (page = 1) =>
+      fetchWithRateLimit(`/recommendations/anime${buildQueryString({ page })}`),
+    getRecentManga: (page = 1) =>
+      fetchWithRateLimit(`/recommendations/manga${buildQueryString({ page })}`),
   },
 
-  // Producer Endpoints
-  producers: {
-    getAll: (page = 1) =>
-      fetchWithRateLimit(`/producers${buildQueryString({ page })}`),
-
-    getById: (id: number, page = 1) =>
-      fetchWithRateLimit(`/producers/${id}/external${buildQueryString({ page })}`),
+  // Users
+  users: {
+    getById: (username: string) =>
+      fetchWithRateLimit(`/users/${username}`),
+    getProfile: (username: string) =>
+      fetchWithRateLimit(`/users/${username}/profile`),
+    getStatistics: (username: string) =>
+      fetchWithRateLimit(`/users/${username}/statistics`),
+    getFavorites: (username: string) =>
+      fetchWithRateLimit(`/users/${username}/favorites`),
+    getHistory: (username: string, type?: 'anime' | 'manga') =>
+      fetchWithRateLimit(`/users/${username}/history${type ? `/${type}` : ''}`),
+    getFriends: (username: string, page = 1) =>
+      fetchWithRateLimit(`/users/${username}/friends${buildQueryString({ page })}`),
+    getReviews: (username: string, page = 1) =>
+      fetchWithRateLimit(`/users/${username}/reviews${buildQueryString({ page })}`),
+    getRecommendations: (username: string, page = 1) =>
+      fetchWithRateLimit(`/users/${username}/recommendations${buildQueryString({ page })}`),
+    getClubs: (username: string, page = 1) =>
+      fetchWithRateLimit(`/users/${username}/clubs${buildQueryString({ page })}`),
+    getExternal: (username: string) =>
+      fetchWithRateLimit(`/users/${username}/external`),
   },
 
-  // Magazine Endpoints
-  magazines: {
-    getAll: (page = 1) =>
-      fetchWithRateLimit(`/magazines${buildQueryString({ page })}`),
-  },
-
-  // Club Endpoints
+  // Clubs
   clubs: {
-    search: (params: ClubSearchParams) =>
-      fetchWithRateLimit(`/clubs${buildQueryString(params)}`),
-
     getById: (id: number) =>
       fetchWithRateLimit(`/clubs/${id}`),
-
     getMembers: (id: number, page = 1) =>
       fetchWithRateLimit(`/clubs/${id}/members${buildQueryString({ page })}`),
-
     getStaff: (id: number) =>
       fetchWithRateLimit(`/clubs/${id}/staff`),
-
     getRelations: (id: number) =>
       fetchWithRateLimit(`/clubs/${id}/relations`),
   },
 
-  // Reviews Endpoints
-  reviews: {
-    getRecent: (page = 1, type?: 'anime' | 'manga') =>
-      fetchWithRateLimit(`/reviews${type ? `/${type}` : ''}${buildQueryString({ page })}`),
-  },
-
-  // Recommendations Endpoints
-  recommendations: {
-    getRecent: (page = 1, type?: 'anime' | 'manga') =>
-      fetchWithRateLimit(`/recommendations${type ? `/${type}` : ''}${buildQueryString({ page })}`),
-  },
-
-  // Random Endpoints
-  random: {
+  // Genres
+  genres: {
     getAnime: () =>
-      fetchWithRateLimit('/random/anime'),
-
+      fetchWithRateLimit('/genres/anime'),
     getManga: () =>
-      fetchWithRateLimit('/random/manga'),
-
-    getCharacter: () =>
-      fetchWithRateLimit('/random/characters'),
-
-    getPerson: () =>
-      fetchWithRateLimit('/random/people'),
-
-    getUserReview: (type?: 'anime' | 'manga') =>
-      fetchWithRateLimit(`/random/reviews${type ? `/${type}` : ''}`),
-
-    getRecommendation: (type?: 'anime' | 'manga') =>
-      fetchWithRateLimit(`/random/recommendations${type ? `/${type}` : ''}`),
+      fetchWithRateLimit('/genres/manga'),
+    getExplicitAnime: () =>
+      fetchWithRateLimit('/genres/explicit'),
+    getThemes: () =>
+      fetchWithRateLimit('/genres/themes'),
+    getDemographics: () =>
+      fetchWithRateLimit('/genres/demographics'),
   },
 
-  // Watch Endpoints
-  watch: {
-    getRecent: (page = 1) =>
-      fetchWithRateLimit(`/watch/episodes${buildQueryString({ page })}`),
+  // Producers
+  producers: {
+    getAll: (page = 1, filter?: string) =>
+      fetchWithRateLimit(`/producers${buildQueryString({ page, filter })}`),
+    getById: (id: number, filter?: string) =>
+      fetchWithRateLimit(`/producers/${id}${filter ? buildQueryString({ filter }) : ''}`),
+    getExternal: (id: number) =>
+      fetchWithRateLimit(`/producers/${id}/external`),
+    getFull: (id: number) =>
+      fetchWithRateLimit(`/producers/${id}/full`),
+  },
 
-    getPopular: (page = 1) =>
-      fetchWithRateLimit(`/watch/episodes/popular${buildQueryString({ page })}`),
+  // Magazines
+  magazines: {
+    getAll: (page = 1, filter?: string) =>
+      fetchWithRateLimit(`/magazines${buildQueryString({ page, filter })}`),
+    getById: (id: number, filter?: string) =>
+      fetchWithRateLimit(`/magazines/${id}${filter ? buildQueryString({ filter }) : ''}`),
+  },
 
-    getPromos: (page = 1) =>
-      fetchWithRateLimit(`/watch/promos${buildQueryString({ page })}`),
+  // Schedule
+  schedule: {
+    get: (day?: string, page = 1, filter?: string) =>
+      fetchWithRateLimit(`/schedules${day ? `/${day}` : ''}${buildQueryString({ page, filter })}`),
+  },
+
+  // Top
+  top: {
+    getAnime: (page = 1, filter?: string) =>
+      fetchWithRateLimit(`/top/anime${buildQueryString({ page, filter })}`),
+    getManga: (page = 1, filter?: string) =>
+      fetchWithRateLimit(`/top/manga${buildQueryString({ page, filter })}`),
+    getPeople: (page = 1, filter?: string) =>
+      fetchWithRateLimit(`/top/people${buildQueryString({ page, filter })}`),
+    getCharacters: (page = 1, filter?: string) =>
+      fetchWithRateLimit(`/top/characters${buildQueryString({ page, filter })}`),
+    getReviews: (page = 1, type?: 'anime' | 'manga') =>
+      fetchWithRateLimit(`/top/reviews${type ? `/${type}` : ''}${buildQueryString({ page })}`),
   },
 };
