@@ -1,7 +1,7 @@
 import React from 'react';
 import SearchBar from './SearchBar';
 
-const UpperContent = () => {
+const HeroContent = () => {
   return (
     <div className="relative min-h-[60vh] flex flex-col items-center justify-center text-center px-4 mb-12 md:mb-24">
       <div className="absolute inset-0 bg-[url('https://img.bunnyccdn.co/_r/1366x768/100/db/86/db8603d2f4fa78e1c42f6cf829030a18/db8603d2f4fa78e1c42f6cf829030a18.jpg')] bg-cover bg-center opacity-10"></div> {/* Maybe have changing pictures and different sizing? */}
@@ -35,4 +35,4 @@ const UpperContent = () => {
   );
 };
 
-export default UpperContent;
+export default HeroContent;
