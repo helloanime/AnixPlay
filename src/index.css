@@ -213,3 +213,15 @@ body {
 .bg-gradient {
   background: linear-gradient(to right, var(--background) 0%, transparent 100%);
 }
+
+.nav-gradient {
+  background: linear-gradient(to bottom, rgba(15, 15, 26, 0.9), rgba(15, 15, 26, 0));
+}
+
+.filter-violet {
+  filter: invert(35%) sepia(64%) saturate(5356%) hue-rotate(255deg) brightness(91%) contrast(93%);
+}
+
+.filter-pink {
+  filter: invert(56%) sepia(44%) saturate(5144%) hue-rotate(308deg) brightness(101%) contrast(97%);
+}
