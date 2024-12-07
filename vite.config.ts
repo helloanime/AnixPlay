@@ -5,7 +5,7 @@ import path from 'path';
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [react()],
-  base: '',
+  base: '/',
   optimizeDeps: {
     exclude: ['lucide-react'],
   },
@@ -15,5 +15,10 @@ export default defineConfig({
       '@assets': path.resolve(__dirname, './src/assets'),
     },
   },
-  assetsInclude: ['**/*.jpg', '**/*.png'],
+  assetsInclude: ['**/*.jpg', '**/*.png', '**/*.svg'],
+  server: {
+    port: 5174,
+    host: true,
+    open: true
+  }
 });

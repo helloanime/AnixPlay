@@ -1,466 +1,1067 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import animeHero from '../assets/anime-hero.jpg';
-import logoImage from '../assets/logo.png';
+import { motion, AnimatePresence, useScroll, useTransform } from 'framer-motion';
+import { gsap } from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { useInView } from 'react-intersection-observer';
+import ScrollToTop from '../components/ScrollToTop';
+import LoadingScreen from '../components/LoadingScreen';
+import { fetchTrendingAnime, type AnimeData } from '../services/anilistService';
+import ParticlesContainer from '../components/ParticlesContainer';
+import AnimatedLogo from '../components/AnimatedLogo';
+
+// Register GSAP plugins
+gsap.registerPlugin(ScrollTrigger);
 
 const Landing = () => {
   const navigate = useNavigate();
   const [imageError, setImageError] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+  const [isLoading, setIsLoading] = useState(true);
+  const [trendingAnime, setTrendingAnime] = useState<AnimeData[]>([]);
+  const { scrollYProgress } = useScroll();
+  const [showScrollIndicator, setShowScrollIndicator] = useState(true);
 
-  const handleWatchAnime = () => {
-    navigate('/home');
+  // Hide scroll indicator when user starts scrolling
+  useEffect(() => {
+    const handleScroll = () => {
+      if (window.scrollY > 50) {
+        setShowScrollIndicator(false);
+      } else {
+        setShowScrollIndicator(true);
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  // Parallax effect for hero section
+  const parallaxY = useTransform(scrollYProgress, [0, 1], [0, 100]);
+
+  // Mouse move effect for hero section
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      const { clientX, clientY } = e;
+      const moveX = clientX - window.innerWidth / 2;
+      const moveY = clientY - window.innerHeight / 2;
+      setMousePosition({ x: moveX / 50, y: moveY / 50 });
+    };
+
+    window.addEventListener('mousemove', handleMouseMove);
+    return () => window.removeEventListener('mousemove', handleMouseMove);
+  }, []);
+
+  // Loading animation
+  useEffect(() => {
+    // Simulate loading time and preload assets
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 2000);
+
+    return () => clearTimeout(timer);
+  }, []);
+
+  // Debug log for render
+  console.log('Current loading state:', isLoading);
+
+  // Navigation variants for animation
+  const navVariants = {
+    hidden: { opacity: 0, y: -20 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: {
+        duration: 0.6,
+        ease: "easeOut"
+      }
+    }
   };
 
-  const handleImageError = (e: React.SyntheticEvent<HTMLImageElement>) => {
+  // Enhanced hero content variants
+  const heroContentVariants = {
+    hidden: { opacity: 0, y: 30 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: {
+        duration: 0.8,
+        ease: "easeOut",
+        staggerChildren: 0.2
+      }
+    }
+  };
+
+  // Text reveal animation variant
+  const textRevealVariant = {
+    hidden: { opacity: 0, y: 20 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: {
+        duration: 0.5,
+        ease: "easeOut"
+      }
+    }
+  };
+
+  // Button hover animation variant
+  const buttonVariant = {
+    hover: {
+      scale: 1.05,
+      transition: {
+        duration: 0.2,
+        ease: "easeInOut"
+      }
+    },
+    tap: {
+      scale: 0.95
+    }
+  };
+
+  const handleImageError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
     console.error('Image failed to load:', e.currentTarget.src);
     setImageError(true);
   };
 
-  const handleShare = async () => {
-    const shareData = {
-      title: 'AnixPlay - Watch Free Anime Online',
-      text: '🎬 Check out AnixPlay - The best place to watch anime online for free! HD quality, no ads, and a huge collection of anime series and movies.',
-      url: window.location.href
-    };
-
-    try {
-      if (navigator.share) {
-        await navigator.share(shareData);
-      } else {
-        await navigator.clipboard.writeText(window.location.href);
-        alert('Link copied to clipboard!');
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        const data = await fetchTrendingAnime();
+        setTrendingAnime(data);
+      } catch (error) {
+        console.error('Error loading trending anime:', error);
       }
-    } catch (error) {
-      console.error('Error sharing:', error);
-      await navigator.clipboard.writeText(window.location.href);
-      alert('Link copied to clipboard!');
-    }
-  };
-
-  const topSearches = [
-    'Dandadan', 'Solo Leveling', 'One Piece', 'Blue Lock',
-    'Tower of God Season 2 Wa...', 'Dragon Ball Daima',
-    'Shangri-La Frontier Season...', 'Black Clover', 'Shangri-La Frontier',
-    'Bleach: Thousand-Year Blo...'
-  ];
-
-  const trendingPosts = [
-    {
-      id: 1,
-      title: 'Best Side/Supporting Character Contest ',
-      content: 'Hello everyone! I just want to say first that other than no & Pro3, Rules are simple :) First come first served...',
-      author: 'Miss Dolphin',
-      time: '5 hours ago',
-      likes: 25
-    },
-    {
-      id: 2,
-      title: 'Time to leave',
-      content: 'Dear guys, so i am leaving this site . I am moving this account to someone else who will take care of it properly and have a great future ahead. Signing off yours tru...',
-      author: 'Lucy Dolphin',
-      time: '5 hours ago',
-      likes: 40
-    },
-  ];
+    };
+    
+    loadData();
+  }, []);
 
   return (
-    <div className="min-h-screen bg-[#0f0f1a] text-white">
-      {/* Navigation */}
-      <nav className="py-4 border-b border-gray-800">
-        <div className="max-w-7xl mx-auto px-4">
-          {/* Mobile Menu Button */}
-          <div className="md:hidden flex justify-end mb-4">
-            <button
-              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="text-gray-400 hover:text-white"
-            >
-              <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" />
-              </svg>
-            </button>
-          </div>
-
-          {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center justify-center gap-8">
-            <Link
-              to="/home"
-              className="text-white font-medium transform-gpu transition-all duration-200 hover:scale-110 hover:-translate-y-0.5 hover:text-pink-400 relative after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-0 after:bg-gradient-to-r after:from-pink-500 after:to-purple-500 hover:after:w-full after:transition-all after:duration-200"
-            >
-              Home
-            </Link>
-            <Link
-              to="/home"
-              className="text-gray-300 hover:text-white font-medium transform-gpu transition-all duration-200 hover:scale-110 hover:-translate-y-0.5 hover:text-pink-400 relative after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-0 after:bg-gradient-to-r after:from-pink-500 after:to-purple-500 hover:after:w-full after:transition-all after:duration-200"
-            >
-              Movies
-            </Link>
-            <Link
-              to="/home"
-              className="text-gray-300 hover:text-white font-medium transform-gpu transition-all duration-200 hover:scale-110 hover:-translate-y-0.5 hover:text-pink-400 relative after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-0 after:bg-gradient-to-r after:from-pink-500 after:to-purple-500 hover:after:w-full after:transition-all after:duration-200"
-            >
-              TV Series
-            </Link>
-            <Link
-              to="/home"
-              className="text-gray-300 hover:text-white font-medium transform-gpu transition-all duration-200 hover:scale-110 hover:-translate-y-0.5 hover:text-pink-400 relative after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-0 after:bg-gradient-to-r after:from-pink-500 after:to-purple-500 hover:after:w-full after:transition-all after:duration-200"
-            >
-              Most Popular
-            </Link>
-            <Link
-              to="/home"
-              className="text-gray-300 hover:text-white font-medium transform-gpu transition-all duration-200 hover:scale-110 hover:-translate-y-0.5 hover:text-pink-400 relative after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-0 after:bg-gradient-to-r after:from-pink-500 after:to-purple-500 hover:after:w-full after:transition-all after:duration-200"
-            >
-              Top Airing
-            </Link>
-          </div>
-
-          {/* Mobile Navigation Menu */}
-          {isMobileMenuOpen && (
-            <div className="md:hidden">
-              <div className="flex flex-col space-y-2">
-                <Link
-                  to="/home"
-                  className="text-white font-medium py-2 px-4 rounded-lg hover:bg-gray-800"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                >
-                  Home
-                </Link>
-                <Link
-                  to="/home"
-                  className="text-gray-300 font-medium py-2 px-4 rounded-lg hover:bg-gray-800"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                >
-                  Movies
-                </Link>
-                <Link
-                  to="/home"
-                  className="text-gray-300 font-medium py-2 px-4 rounded-lg hover:bg-gray-800"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                >
-                  TV Series
-                </Link>
-                <Link
-                  to="/home"
-                  className="text-gray-300 font-medium py-2 px-4 rounded-lg hover:bg-gray-800"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                >
-                  Most Popular
-                </Link>
-                <Link
-                  to="/home"
-                  className="text-gray-300 font-medium py-2 px-4 rounded-lg hover:bg-gray-800"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                >
-                  Top Airing
-                </Link>
-              </div>
-            </div>
-          )}
-        </div>
-      </nav>
-
-      {/* Hero Section */}
-      <div className="max-w-6xl mx-auto px-4 py-8 perspective-[2000px]">
-        <div className="bg-[#1a1a2e] rounded-[32px] relative overflow-hidden min-h-[450px] transform-gpu hover:translate-z-12 hover:rotate-x-1 transition-transform duration-300 ease-out shadow-[0_20px_50px_rgba(0,0,0,0.3)] will-change-transform hover:shadow-[0_30px_60px_rgba(0,0,0,0.5)] before:absolute before:inset-0 before:bg-gradient-to-b before:from-white/10 before:to-transparent before:z-10 border border-gray-800/20">
-          {/* Background Image */}
-          <div className="absolute inset-0 w-full h-full rounded-[32px] overflow-hidden">
-            <img 
-              src={animeHero}
-              alt="Anime Heroes" 
-              className="object-cover w-full h-full transform-gpu transition-transform duration-300 ease-out will-change-transform hover:scale-[1.02] hover:translate-z-8"
-              style={{ 
-                objectPosition: 'center 25%',
-                filter: 'brightness(0.8) contrast(1.1)'
-              }}
-              onError={handleImageError}
-            />
-            <div className="absolute inset-0 bg-gradient-to-r from-[#1a1a2e] via-[#1a1a2e]/80 to-transparent z-10"></div>
-            <div className="absolute inset-0 bg-gradient-to-t from-[#1a1a2e] via-[#1a1a2e]/40 to-transparent z-10"></div>
-            {/* Add subtle edge lighting effect */}
-            <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/5 to-white/10 z-10 rounded-[32px]"></div>
-          </div>
-
-          {/* Content */}
-          <div className="relative z-20 p-4 md:p-10 w-full md:max-w-[500px]">
-            <Link to="/home" className="block mb-8 transform-gpu transition-all duration-200 ease-out hover:translate-z-4 hover:scale-[1.02]">
-              {!imageError ? (
-                <img 
-                  src={logoImage}
-                  alt="AnixPlay" 
-                  className="h-14 md:h-16 w-auto drop-shadow-[0_4px_8px_rgba(0,0,0,0.3)]"
-                  onError={handleImageError}
-                />
-              ) : (
-                <h1 className="text-4xl font-bold drop-shadow-[0_4px_8px_rgba(0,0,0,0.3)]">AnixPlay</h1>
-              )}
-            </Link>
-            
-            {/* Search Bar */}
-            <div className="relative mb-6 transform-gpu transition-all duration-300 hover:scale-[1.02] hover:-translate-y-1 group focus-within:scale-[1.02] focus-within:-translate-y-1 focus-within:shadow-xl focus-within:shadow-black/30 rounded-[20px]">
-              <input
-                type="text"
-                placeholder="Search anime..."
-                className="w-full bg-[#0f0f1a]/90 text-white rounded-[20px] py-3 px-6 focus:outline-none focus:ring-2 focus:ring-pink-500 text-lg placeholder-gray-400 shadow-[0_8px_16px_rgba(0,0,0,0.3)] transition-colors duration-300 group-hover:bg-[#0f0f1a] group-focus-within:bg-[#0f0f1a]"
-              />
-              <button className="absolute right-5 top-1/2 -translate-y-1/2 transform-gpu transition-all duration-200 group-hover:scale-110 group-hover:-translate-y-[55%] group-hover:text-white group-focus-within:scale-110 group-focus-within:-translate-y-[55%] group-focus-within:text-white">
-                <svg className="w-6 h-6 text-gray-400 transition-colors duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                </svg>
-              </button>
-            </div>
-
-            {/* Top Searches */}
-            <div className="mb-6 overflow-x-auto md:overflow-visible">
-              <div className="text-gray-400 text-sm mb-2">Top search:</div>
-              <div className="flex flex-nowrap md:flex-wrap gap-1.5 pb-2 md:pb-0">
-                <button className="min-w-[120px] px-3 py-1 text-sm text-gray-300 hover:text-white bg-[#0f0f1a]/50 hover:bg-[#0f0f1a] border border-gray-700/50 hover:border-gray-600 rounded-full transition-all duration-200 transform hover:scale-105 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-black/20">
-                  Dandadan
-                </button>
-                <button className="min-w-[120px] px-3 py-1 text-sm text-gray-300 hover:text-white bg-[#0f0f1a]/50 hover:bg-[#0f0f1a] border border-gray-700/50 hover:border-gray-600 rounded-full transition-all duration-200 transform hover:scale-105 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-black/20">
-                  Solo Leveling
-                </button>
-                <button className="min-w-[120px] px-3 py-1 text-sm text-gray-300 hover:text-white bg-[#0f0f1a]/50 hover:bg-[#0f0f1a] border border-gray-700/50 hover:border-gray-600 rounded-full transition-all duration-200 transform hover:scale-105 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-black/20">
-                  One Piece
-                </button>
-                <button className="min-w-[120px] px-3 py-1 text-sm text-gray-300 hover:text-white bg-[#0f0f1a]/50 hover:bg-[#0f0f1a] border border-gray-700/50 hover:border-gray-600 rounded-full transition-all duration-200 transform hover:scale-105 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-black/20">
-                  Blue Lock
-                </button>
-                <button className="min-w-[120px] px-3 py-1 text-sm text-gray-300 hover:text-white bg-[#0f0f1a]/50 hover:bg-[#0f0f1a] border border-gray-700/50 hover:border-gray-600 rounded-full transition-all duration-200 transform hover:scale-105 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-black/20">
-                  Dragon Ball Daima
-                </button>
-                <button className="min-w-[120px] px-3 py-1 text-sm text-gray-300 hover:text-white bg-[#0f0f1a]/50 hover:bg-[#0f0f1a] border border-gray-700/50 hover:border-gray-600 rounded-full transition-all duration-200 transform hover:scale-105 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-black/20">
-                  Tower of God S2
-                </button>
-                <button className="min-w-[120px] px-3 py-1 text-sm text-gray-300 hover:text-white bg-[#0f0f1a]/50 hover:bg-[#0f0f1a] border border-gray-700/50 hover:border-gray-600 rounded-full transition-all duration-200 transform hover:scale-105 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-black/20">
-                  Black Clover
-                </button>
-                <button className="min-w-[120px] px-3 py-1 text-sm text-gray-300 hover:text-white bg-[#0f0f1a]/50 hover:bg-[#0f0f1a] border border-gray-700/50 hover:border-gray-600 rounded-full transition-all duration-200 transform hover:scale-105 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-black/20">
-                  Bleach: TYBW
-                </button>
-                <button className="min-w-[120px] px-3 py-1 text-sm text-gray-300 hover:text-white bg-[#0f0f1a]/50 hover:bg-[#0f0f1a] border border-gray-700/50 hover:border-gray-600 rounded-full transition-all duration-200 transform hover:scale-105 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-black/20">
-                  Shangri-La Frontier
-                </button>
-              </div>
-            </div>
-
-            {/* Watch Anime Button */}
-            <button
-              onClick={handleWatchAnime}
-              className="bg-pink-500 hover:bg-pink-600 text-white font-semibold py-3 px-8 rounded-full transform-gpu transition-all duration-200 hover:scale-105 hover:-translate-y-1 hover:shadow-lg hover:shadow-pink-500/30"
-            >
-              <span className="relative inline-flex items-center gap-2">
-                <span className="text-lg text-stroke">Watch Anime</span>
-                <svg
-                  className="w-5 h-5 transition-transform duration-200 group-hover:translate-x-1"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M9 5l7 7-7 7"
-                  />
-                </svg>
-              </span>
-            </button>
-          </div>
-        </div>
-
-        {/* Content Sections */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-12">
-          <div className="col-span-1 md:col-span-2 space-y-8 md:space-y-12 max-w-3xl mx-auto">
-            {/* Main Content */}
-            <section className="space-y-12">
-              {/* Hero Section - Primary SEO Focus */}
-              <div className="text-left max-w-3xl">
-                <h1 className="text-4xl font-bold mb-6">
-                  <span className="text-pink-500">AnixPlay.xyz</span> - #1 Free Anime Streaming Website
-                </h1>
-                <p className="text-gray-300 text-lg leading-relaxed">
-                  Watch anime online free in HD quality with English subbed or dubbed. 
-                  Join over <span className="text-violet-400 font-semibold">10 million anime fans</span> who 
-                  choose AnixPlay as their primary anime streaming site.
-                </p>
-              </div>
-
-              {/* Key Features - Secondary SEO Focus */}
-              <div className="space-y-8">
-                <div className="bg-gray-900/50 p-6 rounded-lg">
-                  <h2 className="text-2xl font-bold mb-4">Watch Free Anime Online on <span className="text-pink-500">AnixPlay.xyz</span></h2>
-                  <p className="text-gray-300 leading-relaxed">
-                    Stream and download your favorite anime series and movies in 
-                    <span className="text-blue-400"> 1080p HD quality</span>. We offer the 
-                    <span className="text-green-400"> largest collection of free anime</span> with both 
-                    English sub and dub options. No registration required, instant access to all episodes.
-                  </p>
-                </div>
-
-                <div className="bg-gray-900/50 p-6 rounded-lg">
-                  <h2 className="text-2xl font-bold mb-4">Best Free Anime Streaming Site - Safe & Legal</h2>
-                  <p className="text-gray-300 leading-relaxed">
-                    <span className="text-green-400 font-semibold">100% Safe and Secure</span> - AnixPlay provides 
-                    a clean, ad-light experience with <span className="text-violet-400">HD quality anime streaming</span>. 
-                    Watch the latest anime episodes immediately after they air in Japan.
-                  </p>
-                </div>
-              </div>
-
-              {/* Features Grid - Keyword Rich Content */}
-              <div>
-                <h2 className="text-2xl font-bold mb-6 text-center">Why AnixPlay is the <span className="text-pink-500">#1 Anime Website</span></h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="feature-card">
-                    <h3 className="text-xl text-pink-500 font-semibold mb-2">Massive Anime Collection</h3>
-                    <p className="text-gray-300">
-                      Access <span className="text-violet-400">100,000+ anime episodes</span> including:
-                      <span className="text-blue-400"> latest seasonal anime, popular shounen, romance, action, 
-                      isekai, fantasy, horror</span> and more. All free, all in HD.
-                    </p>
-                  </div>
-
-                  <div className="feature-card">
-                    <h3 className="text-xl text-pink-500 font-semibold mb-2">HD Quality Streaming</h3>
-                    <p className="text-gray-300">
-                      Watch anime in <span className="text-blue-400">premium quality</span> with options from 
-                      <span className="text-green-400"> 1080p to 360p</span>. Fast loading speeds and no buffering.
-                    </p>
-                  </div>
-
-                  <div className="feature-card">
-                    <h3 className="text-xl text-pink-500 font-semibold mb-2">Latest Anime Updates</h3>
-                    <p className="text-gray-300">
-                      New episodes added <span className="text-violet-400">within hours of Japanese release</span>.
-                      Watch simulcast anime series as they air. Regular updates of <span className="text-blue-400">trending 
-                      and popular anime</span>.
-                    </p>
-                  </div>
-
-                  <div className="feature-card">
-                    <h3 className="text-xl text-pink-500 font-semibold mb-2">Multi-Device Streaming</h3>
-                    <p className="text-gray-300">
-                      Watch anime on any device - <span className="text-blue-400">mobile, tablet, desktop, smart TV</span>.
-                      Perfect streaming experience with <span className="text-green-400">auto-quality adjustment</span>.
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Call to Action - User Intent Focus */}
-              <div className="text-center bg-gray-900/50 p-8 rounded-lg">
-                <h2 className="text-2xl font-bold text-pink-500 mb-4">Start Watching Free Anime Now!</h2>
-                <p className="text-gray-300 text-lg leading-relaxed mb-4">
-                  Join millions of anime fans watching their favorite shows on <span className="text-pink-500">AnixPlay.xyz</span>. 
-                  The best place to <span className="text-violet-400">watch free anime online</span> in HD quality.
-                </p>
-                <div className="mt-6 text-sm text-gray-400">
-                  Keywords: watch anime online, free anime streaming, HD anime, anime download, English sub, English dub, 
-                  latest anime episodes, no ads anime site, best anime website
-                </div>
-              </div>
-            </section>
-          </div>
-
-          <style jsx>{`
-            .feature-card {
-              @apply bg-gray-900/50 p-6 rounded-lg transition-all duration-300;
-            }
-            .feature-card:hover {
-              @apply transform -translate-y-1 shadow-lg shadow-pink-500/20;
-            }
-          `}</style>
-
-          {/* Trending Posts */}
-          <div className="col-span-1">
-            <h2 className="text-xl md:text-2xl font-semibold mb-6">Trending Posts</h2>
-            <div className="space-y-6">
-              {trendingPosts.map((post) => (
-                <div key={post.id} className="bg-[#1a1a2e] p-4 rounded-xl">
-                  <h3 className="text-lg font-semibold text-white mb-2">{post.title}</h3>
-                  <p className="text-gray-400 text-sm mb-3">{post.content}</p>
-                  <div className="flex justify-between items-center text-sm">
-                    <div className="flex items-center gap-2">
-                      <span className="text-pink-500">{post.author}</span>
-                      <span className="text-gray-500">•</span>
-                      <span className="text-gray-500">{post.time}</span>
-                    </div>
-                    <div className="flex items-center gap-1 text-green-500">
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-                        <path d="M2 10.5a1.5 1.5 0 113 0v6a1.5 1.5 0 01-3 0v-6zM6 10.333v5.43a2 2 0 001.106 1.79l.05.025A4 4 0 008.943 18h5.416a2 2 0 001.962-1.608l1.2-6A2 2 0 0015.56 8H12V4a2 2 0 00-2-2 1 1 0 00-1 1v.667a4 4 0 01-.8 2.4L6.8 7.933a4 4 0 00-.8 2.4z" />
-                      </svg>
-                      <span>{post.likes}</span>
-                    </div>
-                  </div>
-                </div>
-              ))}
-              {/* Read More Button */}
-              <button 
-                onClick={() => navigate('/home')}
-                className="w-full mt-4 bg-gradient-to-r from-pink-500 to-purple-600 text-white py-3 px-6 rounded-xl
-                         transform transition-all duration-300 ease-out hover:scale-[1.02] hover:-translate-y-0.5
-                         active:scale-[0.98] shadow-lg hover:shadow-xl hover:shadow-pink-500/20
-                         relative overflow-hidden group"
-              >
-                <span className="absolute inset-0 bg-gradient-to-r from-purple-600 to-pink-500 opacity-0 
-                               group-hover:opacity-100 transition-opacity duration-300 ease-out"></span>
-                <span className="relative flex items-center justify-center gap-2 font-medium">
-                  Read More Posts
-                  <svg 
-                    xmlns="http://www.w3.org/2000/svg" 
-                    className="h-5 w-5 transform transition-transform duration-300 group-hover:translate-x-1" 
-                    viewBox="0 0 24 24" 
-                    fill="currentColor"
-                  >
-                    <path 
-                      fillRule="evenodd" 
-                      d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" 
-                      clipRule="evenodd" 
-                    />
-                  </svg>
-                </span>
-              </button>
-            </div>
-          </div>
-        </div>
-
-        {/* Copyright Section */}
-        <div className="mt-16 border-t border-gray-800">
-          <div className="py-8">
-            <div className="text-center text-gray-500 text-sm">
-              &copy; 2025 AnixPlay.xyz. All rights reserved.
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Share Button */}
-      <div className="fixed bottom-8 right-8 z-50">
-        <button 
-          onClick={handleShare}
-          className="bg-gradient-to-r from-pink-500 to-purple-600 text-white py-3 px-8 rounded-full
-                   transform transition-all duration-300 ease-out hover:scale-[1.02] hover:-translate-y-0.5
-                   active:scale-[0.98] shadow-lg hover:shadow-xl hover:shadow-pink-500/20
-                   relative overflow-hidden group border border-white/10 hover:border-white/20
-                   ring-2 ring-purple-500/20 hover:ring-pink-500/30"
+    <AnimatePresence mode="wait">
+      {isLoading ? (
+        <LoadingScreen key="loading" />
+      ) : (
+        <motion.div
+          key="content"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="min-h-screen bg-[#0a0a0f] text-white relative overflow-hidden"
         >
-          <span className="absolute inset-0 bg-gradient-to-r from-purple-600 to-pink-500 opacity-0 
-                         group-hover:opacity-100 transition-opacity duration-300 ease-out rounded-full"></span>
-          <span className="relative flex items-center justify-center gap-2 font-medium">
-            <svg 
-              xmlns="http://www.w3.org/2000/svg" 
-              className="h-5 w-5 transform transition-transform duration-300 group-hover:rotate-12" 
-              viewBox="0 0 20 20" 
-              fill="currentColor"
+          <ScrollToTop />
+          {/* Animated background particles */}
+          <div className="absolute inset-0 overflow-hidden pointer-events-none">
+            <motion.div
+              animate={{
+                backgroundPosition: ['0% 0%', '100% 100%'],
+              }}
+              transition={{
+                duration: 20,
+                repeat: Infinity,
+                repeatType: "reverse"
+              }}
+              className="absolute inset-0 opacity-30"
+              style={{
+                background: 'radial-gradient(circle at center, #ff49db 0%, transparent 70%)',
+                filter: 'blur(100px)',
+              }}
+            />
+            <div className="absolute inset-0">
+              {Array.from({ length: 20 }).map((_, i) => (
+                <motion.div
+                  key={i}
+                  className="absolute w-1 h-1 bg-white rounded-full"
+                  initial={{
+                    x: Math.random() * window.innerWidth,
+                    y: Math.random() * window.innerHeight,
+                    scale: Math.random() * 0.5 + 0.5,
+                    opacity: Math.random() * 0.5 + 0.25
+                  }}
+                  animate={{
+                    y: [null, Math.random() * window.innerHeight],
+                    opacity: [null, Math.random() * 0.5 + 0.25]
+                  }}
+                  transition={{
+                    duration: Math.random() * 10 + 10,
+                    repeat: Infinity,
+                    ease: "linear"
+                  }}
+                />
+              ))}
+            </div>
+          </div>
+
+          {/* Hero Section with Particles */}
+          <motion.div className="relative h-screen flex items-center justify-center overflow-hidden bg-[#0a0a0f]">
+            {/* Animated Background */}
+            <motion.div 
+              className="absolute inset-0 z-0"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 1 }}
             >
-              <path d="M15 8a3 3 0 10-2.977-2.63l-4.94 2.47a3 3 0 100 4.319l4.94 2.47a3 3 0 10.895-1.789l-4.94-2.47a3.027 3.027 0 000-.74l4.94-2.47C13.456 7.68 14.19 8 15 8z" />
-            </svg>
-            Share AnixPlay
-          </span>
-        </button>
-      </div>
-    </div>
+              <div className="absolute inset-0 bg-gradient-to-b from-[#0a0a0f] via-[#0f0f1a]/90 to-[#0a0a0f]" />
+              <ParticlesContainer />
+            </motion.div>
+
+            {/* Animated Gradient Overlay */}
+            <motion.div
+              className="absolute inset-0 bg-gradient-to-r from-pink-500/5 to-violet-500/5"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 1.5 }}
+            />
+
+            {/* Hero Content */}
+            <motion.div 
+              className="relative z-10 text-center px-4 max-w-4xl mx-auto"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3 }}
+            >
+              {/* Animated Logo */}
+              <motion.div
+                className="mb-4"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.5 }}
+              >
+                <AnimatedLogo />
+              </motion.div>
+
+              <motion.h1 
+                className="text-4xl md:text-6xl font-bold mb-6"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.8 }}
+              >
+                <span className="bg-gradient-to-r from-pink-500 to-violet-500 bg-clip-text text-transparent">
+                  Your Gateway to Anime
+                </span>
+              </motion.h1>
+              
+              <motion.p 
+                className="text-lg md:text-xl text-gray-300 hover:text-gray-200 mb-8 max-w-2xl mx-auto transition-colors"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 1.2 }}
+              >
+                Discover, stream, and immerse yourself in the world of anime. 
+                High-quality content, ad-free experience, and a community that shares your passion.
+              </motion.p>
+
+              {/* CTA Buttons */}
+              <motion.div 
+                className="flex flex-col sm:flex-row gap-4 justify-center"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 1.5 }}
+              >
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  className="px-8 py-3 bg-gradient-to-r from-pink-500 to-violet-500 rounded-full font-semibold text-lg shadow-lg shadow-pink-500/25 hover:shadow-pink-500/40 transition-shadow"
+                  onClick={() => navigate('/home')}
+                >
+                  Start Watching
+                </motion.button>
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  className="px-8 py-3 bg-white/10 backdrop-blur-sm rounded-full font-semibold text-lg border border-white/20 hover:bg-white/20 transition-colors"
+                >
+                  Browse Library
+                </motion.button>
+              </motion.div>
+
+              {/* Scroll Indicator */}
+              <motion.div
+                className="fixed bottom-8 left-1/2 transform -translate-x-1/2 z-50"
+                initial={{ opacity: 1 }}
+                animate={{ 
+                  opacity: showScrollIndicator ? 1 : 0,
+                  y: showScrollIndicator ? 0 : 20
+                }}
+                transition={{ duration: 0.3 }}
+              >
+                <motion.div
+                  animate={{
+                    y: [0, 10, 0],
+                  }}
+                  transition={{
+                    duration: 1.5,
+                    repeat: Infinity,
+                    repeatType: "reverse",
+                  }}
+                  className="w-5 h-8 rounded-full border-2 border-white/30 flex items-start justify-center p-1.5 backdrop-blur-sm"
+                >
+                  <motion.div className="w-1 h-1 rounded-full bg-white/60" />
+                </motion.div>
+              </motion.div>
+            </motion.div>
+          </motion.div>
+
+          {/* Progress bar */}
+          <motion.div
+            className="fixed top-0 left-0 right-0 h-1 bg-pink-500 origin-left z-50"
+            style={{ scaleX: scrollYProgress }}
+          />
+
+          {/* Content Sections with Scroll Animations */}
+          <div className="max-w-6xl mx-auto px-4 py-16">
+            {/* Features Section */}
+            <motion.div
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true, margin: "-100px" }}
+              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
+            >
+              {/* Feature Card 1 */}
+              <motion.div
+                variants={{
+                  hidden: { opacity: 0, y: 50 },
+                  visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: "easeOut" } }
+                }}
+                className="relative group"
+              >
+                <div className="relative bg-white/5 backdrop-blur-xl p-8 rounded-2xl border border-white/10 hover:border-pink-500/50 transition-colors duration-300">
+                  <div className="h-12 w-12 rounded-lg bg-gradient-to-r from-pink-500 to-violet-500 flex items-center justify-center mb-6">
+                    <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                  </div>
+                  <h3 className="text-xl font-bold mb-3 bg-gradient-to-r from-pink-500 to-violet-500 bg-clip-text text-transparent">
+                    HD Streaming
+                  </h3>
+                  <p className="text-gray-400 hover:text-gray-300">
+                    Experience crystal clear video quality with our HD streaming service. Watch your favorite anime in stunning detail.
+                  </p>
+                </div>
+              </motion.div>
+
+              {/* Feature Card 2 */}
+              <motion.div
+                variants={{
+                  hidden: { opacity: 0, y: 50 },
+                  visible: { opacity: 1, y: 0, transition: { duration: 0.6, delay: 0.2, ease: "easeOut" } }
+                }}
+                className="relative group"
+              >
+                <div className="relative bg-white/5 backdrop-blur-xl p-8 rounded-2xl border border-white/10 hover:border-pink-500/50 transition-colors duration-300">
+                  <div className="h-12 w-12 rounded-lg bg-gradient-to-r from-pink-500 to-violet-500 flex items-center justify-center mb-6">
+                    <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                    </svg>
+                  </div>
+                  <h3 className="text-xl font-bold mb-3 bg-gradient-to-r from-pink-500 to-violet-500 bg-clip-text text-transparent">
+                    Ad-Free Experience
+                  </h3>
+                  <p className="text-gray-400 hover:text-gray-300">
+                    Enjoy uninterrupted viewing with our ad-free platform. No more annoying pop-ups or commercial breaks.
+                  </p>
+                </div>
+              </motion.div>
+
+              {/* Feature Card 3 */}
+              <motion.div
+                variants={{
+                  hidden: { opacity: 0, y: 50 },
+                  visible: { opacity: 1, y: 0, transition: { duration: 0.6, delay: 0.4, ease: "easeOut" } }
+                }}
+                className="relative group"
+              >
+                <div className="relative bg-white/5 backdrop-blur-xl p-8 rounded-2xl border border-white/10 hover:border-pink-500/50 transition-colors duration-300">
+                  <div className="h-12 w-12 rounded-lg bg-gradient-to-r from-pink-500 to-violet-500 flex items-center justify-center mb-6">
+                    <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7v16M17 4v16M3 8h4m10 0h4M3 12h18M3 16h4m10 0h4M4 20h16a1 1 0 001-1V5a1 1 0 00-1-1H4a1 1 0 00-1 1v14a1 1 0 001 1z" />
+                    </svg>
+                  </div>
+                  <h3 className="text-xl font-bold mb-3 bg-gradient-to-r from-pink-500 to-violet-500 bg-clip-text text-transparent">
+                    Simulcast Releases
+                  </h3>
+                  <p className="text-gray-400 hover:text-gray-300">
+                    Stay up to date with the latest episodes. Watch new releases as they air in Japan.
+                  </p>
+                </div>
+              </motion.div>
+            </motion.div>
+
+            {/* Statistics Section */}
+            <motion.div
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true }}
+              className="max-w-7xl mx-auto px-4 py-16 bg-white/5 backdrop-blur-sm rounded-2xl mt-24"
+            >
+              <motion.div
+                variants={{
+                  hidden: { opacity: 0, y: 20 },
+                  visible: { opacity: 1, y: 0 }
+                }}
+                className="text-center mb-12"
+              >
+                <h2 className="text-3xl md:text-4xl font-bold mb-4">
+                  <span className="bg-gradient-to-r from-pink-500 to-violet-500 bg-clip-text text-transparent">
+                    Why Choose AnixPlay?
+                  </span>
+                </h2>
+                <p className="text-gray-400 max-w-2xl mx-auto">
+                  Join millions of anime fans who trust AnixPlay for their daily dose of entertainment
+                </p>
+              </motion.div>
+
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+                {[
+                  { number: "10K+", label: "Anime Titles" },
+                  { number: "1M+", label: "Active Users" },
+                  { number: "HD", label: "Quality" },
+                  { number: "0", label: "Ads" }
+                ].map((stat, index) => (
+                  <motion.div
+                    key={index}
+                    variants={{
+                      hidden: { opacity: 0, y: 20 },
+                      visible: { 
+                        opacity: 1, 
+                        y: 0,
+                        transition: { delay: index * 0.1 }
+                      }
+                    }}
+                    className="text-center"
+                  >
+                    <motion.div
+                      initial={{ scale: 0.5, opacity: 0 }}
+                      whileInView={{ scale: 1, opacity: 1 }}
+                      transition={{ duration: 0.5, delay: index * 0.1 }}
+                      className="mb-2"
+                    >
+                      <span className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-pink-500 to-violet-500 bg-clip-text text-transparent">
+                        {stat.number}
+                      </span>
+                    </motion.div>
+                    <p className="text-gray-400 font-medium">{stat.label}</p>
+                  </motion.div>
+                ))}
+              </div>
+
+              {/* Features Grid */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-16">
+                {[
+                  {
+                    icon: "🎯",
+                    title: "Ad-Free Experience",
+                    description: "Enjoy uninterrupted streaming without any advertisements"
+                  },
+                  {
+                    icon: "⚡",
+                    title: "Fast Streaming",
+                    description: "Lightning-fast servers for smooth playback experience"
+                  },
+                  {
+                    icon: "🌟",
+                    title: "HD Quality",
+                    description: "Crystal clear video quality for the best viewing experience"
+                  }
+                ].map((feature, index) => (
+                  <motion.div
+                    key={index}
+                    variants={{
+                      hidden: { opacity: 0, y: 20 },
+                      visible: { 
+                        opacity: 1, 
+                        y: 0,
+                        transition: { delay: 0.2 + index * 0.1 }
+                      }
+                    }}
+                    whileHover={{ y: -5 }}
+                    className="bg-white/5 backdrop-blur-sm p-6 rounded-2xl border border-transparent hover:border-pink-500/50 transition-all duration-300"
+                  >
+                    {/* Feature Icon */}
+                    <div className={`h-12 w-12 rounded-xl bg-gradient-to-r from-pink-500 to-violet-500 flex items-center justify-center mb-6 transform group-hover:scale-110 transition-transform duration-300`}>
+                      <span className="text-2xl">{feature.icon}</span>
+                    </div>
+
+                    {/* Feature Content */}
+                    <h3 className="text-xl font-semibold mb-3 bg-gradient-to-r from-pink-500 to-violet-500 bg-clip-text text-transparent">
+                      {feature.title}
+                    </h3>
+                    <p className="text-gray-400 hover:text-gray-300 leading-relaxed">
+                      {feature.description}
+                    </p>
+
+                    {/* Hover Effect */}
+                    <motion.div
+                      className="absolute inset-0 bg-gradient-to-r from-pink-500/10 to-violet-500/10 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                      initial={false}
+                      whileHover={{ scale: 1.02 }}
+                    />
+                  </motion.div>
+                ))}
+              </div>
+            </motion.div>
+
+            {/* Features Showcase Section */}
+            <motion.div
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true }}
+              className="max-w-7xl mx-auto px-4 py-24"
+            >
+              <motion.div
+                variants={{
+                  hidden: { opacity: 0, y: 20 },
+                  visible: { opacity: 1, y: 0 }
+                }}
+                className="text-center mb-16"
+              >
+                <h2 className="text-3xl md:text-4xl font-bold mb-4">
+                  <span className="bg-gradient-to-r from-pink-500 to-violet-500 bg-clip-text text-transparent">
+                    Experience Anime Like Never Before
+                  </span>
+                </h2>
+                <p className="text-gray-400 max-w-2xl mx-auto">
+                  Discover a world of features designed to enhance your anime watching experience
+                </p>
+              </motion.div>
+
+              {/* Features Grid */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                {[
+                  {
+                    icon: "🎬",
+                    title: "Multi-Quality Streaming",
+                    description: "Choose your preferred quality, from 480p to 4K. Adaptive streaming ensures smooth playback on any device.",
+                    color: "from-pink-500 to-rose-500"
+                  },
+                  {
+                    icon: "🌙",
+                    title: "Dark Mode Optimized",
+                    description: "Easy on the eyes with our carefully crafted dark theme. Perfect for those late-night anime sessions.",
+                    color: "from-violet-500 to-purple-500"
+                  },
+                  {
+                    icon: "📱",
+                    title: "Cross-Platform Sync",
+                    description: "Start watching on your phone, continue on your laptop. Your progress syncs automatically.",
+                    color: "from-blue-500 to-cyan-500"
+                  },
+                  {
+                    icon: "🎯",
+                    title: "Smart Recommendations",
+                    description: "Get personalized anime suggestions based on your watching history and preferences.",
+                    color: "from-green-500 to-emerald-500"
+                  },
+                  {
+                    icon: "💬",
+                    title: "Community Features",
+                    description: "Join discussions, rate episodes, and share your thoughts with fellow anime enthusiasts.",
+                    color: "from-yellow-500 to-orange-500"
+                  },
+                  {
+                    icon: "🔔",
+                    title: "Release Notifications",
+                    description: "Never miss a new episode. Get notified when your favorite shows are updated.",
+                    color: "from-red-500 to-pink-500"
+                  }
+                ].map((feature, index) => (
+                  <motion.div
+                    key={index}
+                    variants={{
+                      hidden: { opacity: 0, y: 20 },
+                      visible: {
+                        opacity: 1,
+                        y: 0,
+                        transition: { delay: index * 0.1 }
+                      }
+                    }}
+                    whileHover={{ y: -5 }}
+                    className="group relative bg-white/5 backdrop-blur-sm p-6 rounded-2xl border border-transparent hover:border-pink-500/50 transition-all duration-300"
+                  >
+                    {/* Feature Icon */}
+                    <div className={`h-12 w-12 rounded-xl bg-gradient-to-r ${feature.color} flex items-center justify-center mb-6 transform group-hover:scale-110 transition-transform duration-300`}>
+                      <span className="text-2xl">{feature.icon}</span>
+                    </div>
+
+                    {/* Feature Content */}
+                    <h3 className="text-xl font-semibold mb-3 bg-gradient-to-r from-pink-500 to-violet-500 bg-clip-text text-transparent">
+                      {feature.title}
+                    </h3>
+                    <p className="text-gray-400 hover:text-gray-300 leading-relaxed">
+                      {feature.description}
+                    </p>
+
+                    {/* Hover Effect */}
+                    <motion.div
+                      className="absolute inset-0 bg-gradient-to-r from-pink-500/10 to-violet-500/10 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                      initial={false}
+                      whileHover={{ scale: 1.02 }}
+                    />
+                  </motion.div>
+                ))}
+              </div>
+
+              {/* Call to Action */}
+              <motion.div
+                variants={{
+                  hidden: { opacity: 0, y: 20 },
+                  visible: { opacity: 1, y: 0 }
+                }}
+                className="text-center mt-16"
+              >
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  className="px-8 py-3 bg-white/10 backdrop-blur-sm rounded-full font-semibold text-lg border border-white/20 hover:bg-white/20 transition-colors inline-flex items-center gap-2"
+                >
+                  Explore All Features
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                  </svg>
+                </motion.button>
+              </motion.div>
+            </motion.div>
+
+            {/* Trending Anime Section */}
+            <motion.div
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true, margin: "-100px" }}
+              className="mt-32"
+            >
+              {/* Section Header */}
+              <motion.div
+                variants={{
+                  hidden: { opacity: 0, y: 20 },
+                  visible: { opacity: 1, y: 0 }
+                }}
+                className="text-center mb-16"
+              >
+                <h2 className="text-3xl md:text-4xl font-bold mb-4">
+                  <span className="bg-gradient-to-r from-pink-500 to-violet-500 bg-clip-text text-transparent">
+                    Trending Now
+                  </span>
+                </h2>
+                <p className="text-gray-400 max-w-2xl mx-auto">
+                  Discover what's hot in the anime world. Stay up to date with the most popular series and latest releases.
+                </p>
+              </motion.div>
+
+              {/* Anime Cards Grid */}
+              <motion.div
+                variants={{
+                  hidden: { opacity: 0 },
+                  visible: { opacity: 1, transition: { staggerChildren: 0.1 } }
+                }}
+                className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 px-4"
+              >
+                {trendingAnime.map((anime, index) => (
+                  <motion.div
+                    key={anime.id}
+                    variants={{
+                      hidden: { opacity: 0, y: 20 },
+                      visible: { opacity: 1, y: 0, transition: { duration: 0.5 } }
+                    }}
+                    whileHover={{ y: -10 }}
+                    className="group relative rounded-xl overflow-hidden cursor-pointer"
+                  >
+                    <div className="aspect-w-2 aspect-h-3 relative">
+                      <img
+                        src={anime.coverImage.large}
+                        alt={anime.title.english || anime.title.romaji}
+                        className="object-cover w-full h-full transform group-hover:scale-110 transition-transform duration-300"
+                      />
+                      
+                      {/* Hover Content */}
+                      <div className="absolute inset-0 flex flex-col justify-end p-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                        <h3 className="text-xl font-bold text-white mb-2">
+                          {anime.title.english || anime.title.romaji}
+                        </h3>
+                        <div className="flex items-center gap-4 text-sm">
+                          <div className="flex items-center">
+                            <svg className="w-4 h-4 text-yellow-500 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                              <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292z" />
+                            </svg>
+                            {(anime.averageScore / 10).toFixed(1)}
+                          </div>
+                          <div className="flex items-center">
+                            <svg className="w-4 h-4 text-pink-500 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 4v16M17 4v16M3 8h4m10 0h4M3 12h18M3 16h4m10 0h4M4 20h16a1 1 0 001-1V5a1 1 0 00-1-1H4a1 1 0 00-1 1v14a1 1 0 001 1z" />
+                            </svg>
+                            {anime.episodes || '?'} Episodes
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Quick Action Button */}
+                    <motion.button
+                      whileHover={{ scale: 1.1 }}
+                      whileTap={{ scale: 0.9 }}
+                      className="absolute top-4 right-4 bg-pink-500 p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                    >
+                      <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                      </svg>
+                    </motion.button>
+                  </motion.div>
+                ))}
+              </motion.div>
+
+              {/* View All Button */}
+              <motion.div
+                variants={{
+                  hidden: { opacity: 0, y: 20 },
+                  visible: { opacity: 1, y: 0 }
+                }}
+                className="text-center mt-12 mb-16"
+              >
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  className="px-8 py-3 bg-white/10 backdrop-blur-sm rounded-full font-semibold text-lg border border-white/20 hover:bg-white/20 transition-colors inline-flex items-center gap-2"
+                >
+                  View All Trending
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                  </svg>
+                </motion.button>
+              </motion.div>
+            </motion.div>
+
+            <motion.div 
+              className="grid grid-cols-1 md:grid-cols-3 gap-8"
+              initial={{ opacity: 0, y: 50 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.2 }}
+              viewport={{ once: true }}
+            >
+              <div className="col-span-1 md:col-span-2 space-y-12">
+                {/* Main Content */}
+                <motion.section 
+                  className="space-y-12"
+                  variants={{
+                    hidden: { opacity: 0 },
+                    visible: { opacity: 1 }
+                  }}
+                  initial="hidden"
+                  whileInView="visible"
+                  viewport={{ once: true }}
+                >
+                  {/* Hero Section - Primary SEO Focus */}
+                  <motion.div 
+                    className="text-left max-w-3xl"
+                    variants={{
+                      hidden: { opacity: 0, y: 20 },
+                      visible: { opacity: 1, y: 0 }
+                    }}
+                    transition={{ duration: 0.6 }}
+                  >
+                    <h1 className="text-4xl font-bold mb-6">
+                      <span className="text-transparent bg-clip-text bg-gradient-to-r from-pink-500 to-violet-500">AnixPlay.xyz</span> - #1 Free Anime Streaming Website
+                    </h1>
+                    <p className="text-gray-300 text-lg leading-relaxed">
+                      Watch anime online free in HD quality with English subbed or dubbed. 
+                      Join over <span className="text-violet-400 font-semibold">10 million anime fans</span> who 
+                      choose AnixPlay as their primary anime streaming site.
+                    </p>
+                  </motion.div>
+
+                  {/* Features Grid with Hover Effects */}
+                  <motion.div 
+                    className="grid grid-cols-1 md:grid-cols-2 gap-6"
+                    variants={{
+                      hidden: { opacity: 0 },
+                      visible: {
+                        opacity: 1,
+                        transition: {
+                          staggerChildren: 0.2
+                        }
+                      }
+                    }}
+                  >
+                    <motion.div
+                      className="feature-card group"
+                      variants={{
+                        hidden: { opacity: 0, y: 20 },
+                        visible: { opacity: 1, y: 0 }
+                      }}
+                      whileHover={{ scale: 1.02 }}
+                      transition={{ duration: 0.3 }}
+                    >
+                      <div className="relative overflow-hidden rounded-2xl bg-[#0a0a0f] p-6 shadow-xl border border-transparent hover:border-pink-500/50 transition-all duration-300">
+                        <h3 className="text-xl text-transparent bg-clip-text bg-gradient-to-r from-pink-500 to-violet-500 font-semibold mb-3">
+                          Massive Anime Collection
+                        </h3>
+                        <p className="text-gray-300">
+                          Access <span className="text-violet-400">100,000+ anime episodes</span> including
+                          <span className="text-blue-400"> latest seasonal anime, popular shounen, romance, action</span> and more.
+                        </p>
+                      </div>
+                    </motion.div>
+
+                    <motion.div
+                      className="feature-card group"
+                      variants={{
+                        hidden: { opacity: 0, y: 20 },
+                        visible: { opacity: 1, y: 0 }
+                      }}
+                      whileHover={{ scale: 1.02 }}
+                      transition={{ duration: 0.3 }}
+                    >
+                      <div className="relative overflow-hidden rounded-2xl bg-[#0a0a0f] p-6 shadow-xl border border-transparent hover:border-violet-500/50 transition-all duration-300">
+                        <h3 className="text-xl text-transparent bg-clip-text bg-gradient-to-r from-pink-500 to-violet-500 font-semibold mb-3">
+                          HD Quality Streaming
+                        </h3>
+                        <p className="text-gray-300">
+                          Watch anime in <span className="text-blue-400">premium quality</span> with 
+                          options from <span className="text-violet-500">1080p</span> to 360p. Fast loading 
+                          speeds and no buffering.
+                        </p>
+                      </div>
+                    </motion.div>
+
+                    <motion.div
+                      className="feature-card group"
+                      variants={{
+                        hidden: { opacity: 0, y: 20 },
+                        visible: { opacity: 1, y: 0 }
+                      }}
+                      whileHover={{ scale: 1.02 }}
+                      transition={{ duration: 0.3 }}
+                    >
+                      <div className="relative overflow-hidden rounded-2xl bg-[#0a0a0f] p-6 shadow-xl border border-transparent hover:border-pink-500/50 transition-all duration-300">
+                        <h3 className="text-xl text-transparent bg-clip-text bg-gradient-to-r from-pink-500 to-violet-500 font-semibold mb-3">
+                          Latest Updates
+                        </h3>
+                        <p className="text-gray-300">
+                          New episodes added <span className="text-violet-400">within hours of Japanese release</span>.
+                          Watch simulcast anime series as they air.
+                        </p>
+                      </div>
+                    </motion.div>
+
+                    <motion.div
+                      className="feature-card group"
+                      variants={{
+                        hidden: { opacity: 0, y: 20 },
+                        visible: { opacity: 1, y: 0 }
+                      }}
+                      whileHover={{ scale: 1.02 }}
+                      transition={{ duration: 0.3 }}
+                    >
+                      <div className="relative overflow-hidden rounded-2xl bg-[#0a0a0f] p-6 shadow-xl border border-transparent hover:border-violet-500/50 transition-all duration-300">
+                        <h3 className="text-xl text-transparent bg-clip-text bg-gradient-to-r from-pink-500 to-violet-500 font-semibold mb-3">
+                          Multi-Device Streaming
+                        </h3>
+                        <p className="text-gray-300">
+                          Watch anime on any device - <span className="text-blue-400">mobile</span>, 
+                          <span className="text-violet-500">tablet</span>, desktop, smart TV. Perfect streaming 
+                          experience.
+                        </p>
+                      </div>
+                    </motion.div>
+                  </motion.div>
+
+                  {/* Call to Action */}
+                  <motion.div
+                    className="text-center relative overflow-hidden rounded-3xl bg-[#0a0a0f] p-8 shadow-xl"
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.6 }}
+                    viewport={{ once: true }}
+                  >
+                    <motion.div
+                      className="absolute inset-0 opacity-30"
+                      animate={{
+                        background: [
+                          'radial-gradient(circle at 0% 0%, #ff49db 0%, transparent 50%)',
+                          'radial-gradient(circle at 100% 100%, #ff49db 0%, transparent 50%)',
+                          'radial-gradient(circle at 0% 0%, #ff49db 0%, transparent 50%)'
+                        ]
+                      }}
+                      transition={{ duration: 10, repeat: Infinity }}
+                    />
+                    <div className="relative z-10">
+                      <h2 className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-pink-500 to-violet-500 mb-4">
+                        Start Your Anime Journey Today!
+                      </h2>
+                      <p className="text-gray-300 text-lg leading-relaxed mb-6">
+                        Join millions of anime fans watching their favorite shows on AnixPlay. 
+                        The ultimate destination for anime streaming.
+                      </p>
+                      <motion.button
+                        onClick={() => navigate('/home')}
+                        className="bg-gradient-to-r from-pink-500 to-violet-500 text-white font-bold py-4 px-8 rounded-full"
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                      >
+                        Explore Now
+                      </motion.button>
+                    </div>
+                  </motion.div>
+                </motion.section>
+              </div>
+
+              {/* Right Sidebar */}
+              <motion.div
+                className="col-span-1"
+                initial={{ opacity: 0, x: 20 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.6, delay: 0.4 }}
+                viewport={{ once: true }}
+              >
+                <h2 className="text-2xl font-bold mb-6 text-transparent bg-clip-text bg-gradient-to-r from-pink-500 to-violet-500">
+                  Top Searches
+                </h2>
+                <div className="space-y-3">
+                  {['Solo Leveling', 'One Piece', 'Blue Lock', 'Dandadan'].map((anime, index) => (
+                    <motion.div
+                      key={anime}
+                      className="group cursor-pointer"
+                      initial={{ opacity: 0, x: 20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: index * 0.1 }}
+                    >
+                      <div className="bg-[#1a1a2e] p-4 rounded-xl group-hover:bg-gradient-to-r from-pink-500/10 to-violet-500/10 transition-all duration-300">
+                        <div className="flex items-center justify-between">
+                          <span className="text-gray-300 group-hover:text-white transition-colors duration-300">
+                            {anime}
+                          </span>
+                          <motion.svg
+                            className="w-5 h-5 text-gray-500 group-hover:text-pink-500"
+                            whileHover={{ scale: 1.2 }}
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                          >
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7m0 0l-7 7m7-7H3" />
+                          </motion.svg>
+                        </div>
+                      </div>
+                    </motion.div>
+                  ))}
+                </div>
+              </motion.div>
+            </motion.div>
+          </div>
+
+          {/* Footer Section */}
+          <motion.footer
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true }}
+            className="mt-32 border-t border-white/10 pt-16 pb-8"
+          >
+            <div className="max-w-7xl mx-auto px-4">
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-16">
+                {/* Brand Section */}
+                <motion.div
+                  variants={{
+                    hidden: { opacity: 0, y: 20 },
+                    visible: { opacity: 1, y: 0, transition: { duration: 0.5 } }
+                  }}
+                  className="col-span-1 md:col-span-2"
+                >
+                  <h3 className="text-2xl font-bold mb-4">
+                    <span className="bg-gradient-to-r from-pink-500 to-violet-500 bg-clip-text text-transparent">
+                      AnixPlay
+                    </span>
+                  </h3>
+                  <p className="text-gray-400 mb-6">
+                    Your ultimate destination for streaming anime. Watch your favorite shows in HD quality with no interruptions.
+                  </p>
+                  <div className="flex space-x-4">
+                    {['twitter', 'discord', 'github'].map((social) => (
+                      <motion.a
+                        key={social}
+                        href={`#${social}`}
+                        whileHover={{ y: -3 }}
+                        whileTap={{ scale: 0.95 }}
+                        className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-white/20 transition-colors"
+                      >
+                        <img
+                          src={`/icons/${social}.svg`}
+                          alt={social}
+                          className="w-5 h-5"
+                        />
+                      </motion.a>
+                    ))}
+                  </div>
+                </motion.div>
+
+                {/* Quick Links */}
+                <motion.div
+                  variants={{
+                    hidden: { opacity: 0, y: 20 },
+                    visible: { opacity: 1, y: 0, transition: { duration: 0.5, delay: 0.1 } }
+                  }}
+                >
+                  <h4 className="font-semibold mb-4">Quick Links</h4>
+                  <ul className="space-y-2">
+                    {['Home', 'Trending', 'Schedule', 'Movies'].map((link) => (
+                      <li key={link}>
+                        <a
+                          href={`#${link.toLowerCase()}`}
+                          className="text-gray-400 hover:text-white transition-colors"
+                        >
+                          {link}
+                        </a>
+                      </li>
+                    ))}
+                  </ul>
+                </motion.div>
+
+                {/* Newsletter */}
+                <motion.div
+                  variants={{
+                    hidden: { opacity: 0, y: 20 },
+                    visible: { opacity: 1, y: 0, transition: { duration: 0.5, delay: 0.2 } }
+                  }}
+                >
+                  <h4 className="font-semibold mb-4">Stay Updated</h4>
+                  <p className="text-gray-400 mb-4">
+                    Subscribe to our newsletter for updates and new releases.
+                  </p>
+                  <div className="flex">
+                    <input
+                      type="email"
+                      placeholder="Enter your email"
+                      className="flex-1 bg-white/10 rounded-l-full px-4 py-2 outline-none focus:ring-2 focus:ring-pink-500"
+                    />
+                    <motion.button
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      className="bg-gradient-to-r from-pink-500 to-violet-500 text-white px-6 py-2 rounded-r-full font-medium"
+                    >
+                      Join
+                    </motion.button>
+                  </div>
+                </motion.div>
+              </div>
+
+              {/* Bottom Bar */}
+              <motion.div
+                variants={{
+                  hidden: { opacity: 0 },
+                  visible: { opacity: 1, transition: { delay: 0.3 } }
+                }}
+                className="border-t border-white/10 pt-8 flex flex-col md:flex-row justify-between items-center text-sm text-gray-400"
+              >
+                <p> 2024 AnixPlay. All rights reserved.</p>
+                <div className="flex space-x-6 mt-4 md:mt-0">
+                  <a href="#privacy" className="hover:text-white transition-colors">Privacy Policy</a>
+                  <a href="#terms" className="hover:text-white transition-colors">Terms of Service</a>
+                  <a href="#contact" className="hover:text-white transition-colors">Contact Us</a>
+                </div>
+              </motion.div>
+            </div>
+          </motion.footer>
+        </motion.div>
+      )}
+    </AnimatePresence>
   );
 };
 
