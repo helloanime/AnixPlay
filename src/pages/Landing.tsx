@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { motion, AnimatePresence, useScroll, useTransform } from 'framer-motion';
+import { motion, AnimatePresence, useScroll, useTransform, useSpring } from 'framer-motion';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useInView } from 'react-intersection-observer';
@@ -21,7 +21,17 @@ const Landing = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [trendingAnime, setTrendingAnime] = useState<AnimeData[]>([]);
   const { scrollYProgress } = useScroll();
+  const scaleX = useSpring(scrollYProgress, {
+    stiffness: 100,
+    damping: 30,
+    restDelta: 0.001
+  });
   const [showScrollIndicator, setShowScrollIndicator] = useState(true);
+
+  // Reset scroll position when component mounts
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
 
   // Hide scroll indicator when user starts scrolling
   useEffect(() => {
@@ -148,79 +158,19 @@ const Landing = () => {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="min-h-screen bg-[#0a0a0f] text-white relative overflow-hidden"
+          className="min-h-screen bg-[#0a0a0f] text-white relative"
         >
           <ScrollToTop />
-          {/* Animated background particles */}
-          <div className="absolute inset-0 overflow-hidden pointer-events-none">
-            <motion.div
-              animate={{
-                backgroundPosition: ['0% 0%', '100% 100%'],
-              }}
-              transition={{
-                duration: 20,
-                repeat: Infinity,
-                repeatType: "reverse"
-              }}
-              className="absolute inset-0 opacity-30"
-              style={{
-                background: 'radial-gradient(circle at center, #ff49db 0%, transparent 70%)',
-                filter: 'blur(100px)',
-              }}
-            />
-            <div className="absolute inset-0">
-              {Array.from({ length: 20 }).map((_, i) => (
-                <motion.div
-                  key={i}
-                  className="absolute w-1 h-1 bg-white rounded-full"
-                  initial={{
-                    x: Math.random() * window.innerWidth,
-                    y: Math.random() * window.innerHeight,
-                    scale: Math.random() * 0.5 + 0.5,
-                    opacity: Math.random() * 0.5 + 0.25
-                  }}
-                  animate={{
-                    y: [null, Math.random() * window.innerHeight],
-                    opacity: [null, Math.random() * 0.5 + 0.25]
-                  }}
-                  transition={{
-                    duration: Math.random() * 10 + 10,
-                    repeat: Infinity,
-                    ease: "linear"
-                  }}
-                />
-              ))}
-            </div>
+          
+          {/* Particles Background */}
+          <div className="fixed inset-0 pointer-events-none">
+            <ParticlesContainer />
           </div>
 
-          {/* Hero Section with Particles */}
-          <motion.div className="relative h-screen flex items-center justify-center overflow-hidden bg-[#0a0a0f]">
-            {/* Animated Background */}
-            <motion.div 
-              className="absolute inset-0 z-0"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 1 }}
-            >
-              <div className="absolute inset-0 bg-gradient-to-b from-[#0a0a0f] via-[#0f0f1a]/90 to-[#0a0a0f]" />
-              <ParticlesContainer />
-            </motion.div>
-
-            {/* Animated Gradient Overlay */}
-            <motion.div
-              className="absolute inset-0 bg-gradient-to-r from-pink-500/5 to-violet-500/5"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 1.5 }}
-            />
-
-            {/* Hero Content */}
-            <motion.div 
-              className="relative z-10 text-center px-4 max-w-4xl mx-auto"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.3 }}
-            >
+          {/* Hero Section */}
+          <div className="relative min-h-screen flex flex-col justify-center items-center">
+            {/* Content */}
+            <div className="relative z-10 container mx-auto px-4 text-center">
               {/* Animated Logo */}
               <motion.div
                 className="mb-4"
@@ -300,13 +250,14 @@ const Landing = () => {
                   <motion.div className="w-1 h-1 rounded-full bg-white/60" />
                 </motion.div>
               </motion.div>
-            </motion.div>
-          </motion.div>
+            </div>
+          </div>
 
           {/* Progress bar */}
           <motion.div
             className="fixed top-0 left-0 right-0 h-1 bg-pink-500 origin-left z-50"
-            style={{ scaleX: scrollYProgress }}
+            style={{ scaleX }}
+            initial={{ scaleX: 0 }}
           />
 
           {/* Content Sections with Scroll Animations */}
